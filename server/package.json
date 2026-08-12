@@ -1,0 +1,4 @@
+{
+  "name":"valerio-ai-server","private":true,"type":"module","scripts":{"dev":"node --watch index.mjs","start":"node index.mjs"},
+  "dependencies":{"@openai/agents":"latest","@octokit/rest":"latest","cors":"latest","dotenv":"latest","express":"latest","zod":"latest"}
+}
