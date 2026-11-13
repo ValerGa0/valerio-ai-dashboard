@@ -105,6 +105,10 @@ function App(){
   const [password,setPassword]=useState('');
   const [authError,setAuthError]=useState('');
   const [busy,setBusy]=useState(false);
+  const [assistantBusy,setAssistantBusy]=useState(false);
+  const [weatherData,setWeatherData]=useState(null);
+  const [weatherError,setWeatherError]=useState('');
+  const [sources,setSources]=useState([]);
   const [chat,setChat]=useState([]);
   const [message,setMessage]=useState('');
   const [mobileOpen,setMobileOpen]=useState(false);
@@ -120,6 +124,15 @@ function App(){
   useEffect(()=>{
     localStorage.setItem('madeira-saved',JSON.stringify(saved));
   },[saved]);
+
+  useEffect(()=>{
+    fetch('/api/sources').then(r=>r.ok?r.json():Promise.reject()).then(data=>setSources(data.sources||[])).catch(()=>setSources([]));
+  },[]);
+
+  useEffect(()=>{
+    if(active!=='weather'||weatherData) return;
+    fetch('/api/weather').then(r=>r.ok?r.json():r.json().then(e=>Promise.reject(new Error(e.error||'IPMA unavailable')))).then(setWeatherData).catch(e=>setWeatherError(e.message||'IPMA data unavailable'));
+  },[active,weatherData]);
 
   useEffect(()=>{
     if(!supabase||!user) return;
@@ -153,11 +166,18 @@ function App(){
 
   const signOut=async()=>{if(supabase)await supabase.auth.signOut();setUser(null);};
 
-  const sendChat=(e)=>{
-    e.preventDefault();if(!message.trim())return;
+  const sendChat=async(e)=>{
+    e.preventDefault();if(!message.trim()||assistantBusy)return;
     const q=message.trim();
-    setChat(old=>[...old,{role:'user',text:q},{role:'assistant',text:localAnswer(q,lang)}]);
-    setMessage('');
+    const next=[...chat,{role:'user',text:q}];
+    setChat(next);setMessage('');setAssistantBusy(true);
+    try{
+      const response=await fetch('/api/concierge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:next.slice(-10).map(m=>({role:m.role,content:m.text}))})});
+      const data=await response.json();
+      if(!response.ok)throw new Error(data.error||'AI service unavailable');
+      setChat(old=>[...old,{role:'assistant',text:data.answer}]);
+    }catch(error){setChat(old=>[...old,{role:'assistant',text:'MADEIRA AI: '+error.message+'\nПроверьте OPENAI_API_KEY в серверных переменных Vercel.'}]);}
+    finally{setAssistantBusy(false);}
   };
 
   const openSection=(id)=>{setActive(id);setMobileOpen(false);};
@@ -225,7 +245,7 @@ function App(){
 
         {active==='weather'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">ISLAND WEATHER</span><h1>Погода на Мадейре</h1><p>Климат на острове различается по высоте и побережью. Перед походами и поездками сверяйте прогноз и предупреждения.</p></div><div className="weather-grid"><div className="weather-main"><CloudSun size={46}/><span>АТЛАНТИЧЕСКИЙ КЛИМАТ</span><h2>Погода меняется вместе с высотой</h2><p>На побережье может быть солнечно, пока в горах прохладно и облачно.</p></div><div className="weather-links"><h3>Официальные источники</h3><a href="https://www.ipma.pt/" target="_blank" rel="noreferrer">IPMA — прогноз и предупреждения <ArrowUpRight size={14}/></a><a href="https://www.procivmadeira.pt/" target="_blank" rel="noreferrer">Proteção Civil Madeira <ArrowUpRight size={14}/></a></div></div></section>}
 
-        {active==='concierge'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">MADEIRA AI · CONCIERGE</span><h1>{t.concierge}</h1><p>{t.previewText}</p></div><div className="chat-panel"><div className="chat-top"><div className="ai-avatar"><Sparkles/></div><div><b>MADEIRA AI</b><small>Island assistant · Preview</small></div><span className="preview-pill">PREVIEW</span></div><div className="chat-messages">{chat.length===0&&<div className="welcome-message"><Sparkles size={25}/><h3>Чем помочь на Мадейре?</h3><p>Спросите о районах, маршрутах, недвижимости или идеях для поездки.</p><div className="suggestions">{['Что посмотреть за 3 дня?','Где искать участок для виллы?','Как подготовиться к походу?'].map(q=><button key={q} onClick={()=>setMessage(q)}>{q}<ArrowUpRight size={13}/></button>)}</div></div>}{chat.map((m,i)=><div className={'chat-bubble '+m.role} key={i}>{m.text}</div>)}</div><form className="chat-form" onSubmit={sendChat}><input value={message} onChange={e=>setMessage(e.target.value)} placeholder={t.askPlaceholder}/><button className="primary" type="submit"><Send size={16}/>{t.send}</button></form><div className="chat-disclaimer">Демонстрационные ответы. Подключение реальной языковой модели — следующий этап.</div></div></section>}
+        {active==='concierge'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">MADEIRA AI · CONCIERGE</span><h1>{t.concierge}</h1><p>{t.previewText}</p></div><div className="chat-panel"><div className="chat-top"><div className="ai-avatar"><Sparkles/></div><div><b>MADEIRA AI</b><small>Island assistant · Preview</small></div><span className="preview-pill">PREVIEW</span></div><div className="chat-messages">{chat.length===0&&<div className="welcome-message"><Sparkles size={25}/><h3>Чем помочь на Мадейре?</h3><p>Спросите о районах, маршрутах, недвижимости или идеях для поездки.</p><div className="suggestions">{['Что посмотреть за 3 дня?','Где искать участок для виллы?','Как подготовиться к походу?'].map(q=><button key={q} onClick={()=>setMessage(q)}>{q}<ArrowUpRight size={13}/></button>)}</div></div>}{chat.map((m,i)=><div className={'chat-bubble '+m.role} key={i}>{m.text}</div>)}</div><form className="chat-form" onSubmit={sendChat}><input value={message} onChange={e=>setMessage(e.target.value)} placeholder={t.askPlaceholder}/><button className="primary" type="submit" disabled={assistantBusy}><Send size={16}/>{assistantBusy?'…':t.send}</button></form><div className="chat-disclaimer">{assistantBusy?'MADEIRA AI формирует ответ…':'AI-ответы доступны через серверный API. Данные IPMA и официальные источники указаны отдельно.'}</div></div></section>}
 
         <footer className="page-footer"><span>MADEIRA AI · ISLAND INTELLIGENCE</span><span>{t.author}</span></footer>
       </div>
