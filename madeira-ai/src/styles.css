@@ -23,3 +23,42 @@
 .location-detect-button:disabled{opacity:.65;cursor:wait}
 .location-weather-updated{color:#758b80;font-size:9px}
 @media(max-width:560px){.location-weather-card{padding:16px}.location-weather-data{align-items:flex-start;flex-direction:column;gap:13px}.location-weather-details{gap:9px 16px}.location-temperature strong{font-size:39px}}
+
+
+/* Premium Atlantic-inspired MADEIRA AI home dashboard */
+.dashboard-welcome{min-height:300px;display:grid;grid-template-columns:1fr .9fr;position:relative;isolation:isolate;overflow:hidden;border:1px solid #31554e;border-radius:20px;background:linear-gradient(112deg,#06283b 0%,#07516b 48%,#123b45 100%);box-shadow:0 20px 55px #0003}
+.dashboard-welcome:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 80% 18%,#77c7d455,transparent 35%),linear-gradient(180deg,#1a9dc522,#041d2b66)}
+.dashboard-welcome-copy{padding:37px 12px 34px 38px;align-self:center;z-index:1}
+.dashboard-welcome-copy h1{font:800 clamp(36px,4vw,54px)/1 Manrope,sans-serif;letter-spacing:.015em;color:#f4f5ef;margin:19px 0 13px}
+.dashboard-welcome-copy>p{max-width:440px;color:#c1d6d7;font-size:12px;line-height:1.8}
+.dashboard-welcome-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:21px}
+.dashboard-coast-art{position:relative;min-height:300px;overflow:hidden;background:linear-gradient(180deg,#46a5d2 0%,#9bd4df 42%,#076184 43%,#03445d 100%)}
+.dashboard-coast-art:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 78% 13%,#fff8 0 3%,transparent 24%),linear-gradient(180deg,transparent 48%,#002c36aa 100%)}
+.coast-sun{position:absolute;width:82px;height:82px;right:24%;top:12%;border-radius:50%;background:#f3d99a;box-shadow:0 0 70px 24px #f4d79a88}
+.coast-cliff{position:absolute;right:-8%;bottom:14%;width:83%;height:72%;background:linear-gradient(135deg,#315b47,#173e39 55%,#0c2b31);clip-path:polygon(10% 42%,28% 18%,43% 32%,56% 0,73% 15%,100% 0,100% 100%,0 100%);filter:drop-shadow(-10px 8px 10px #001c2a88)}
+.coast-cliff:after{content:"";position:absolute;inset:8% 5% 0;background:repeating-linear-gradient(165deg,transparent 0 17px,#b9a66a55 18px 20px,transparent 22px 35px);opacity:.65}
+.coast-sea{position:absolute;left:-5%;right:0;bottom:0;height:39%;background:repeating-linear-gradient(174deg,#38a5b9 0 2px,#08728e 3px 12px,#064e6c 13px 23px);clip-path:polygon(0 17%,40% 0,100% 25%,100% 100%,0 100%)}
+.dashboard-coast-art>span{position:absolute;right:17px;bottom:14px;color:#e2e6d4;font-size:8px;letter-spacing:.22em;text-shadow:0 2px 6px #001a22}
+.location-weather-card{margin-top:16px;padding:21px 23px;border-color:#31564e;background:linear-gradient(110deg,#082f42 0%,#0a2631 65%,#1a3934 100%);box-shadow:0 14px 34px #0002}
+.location-weather-heading h2{font-size:18px}
+.location-weather-heading .eyebrow{color:#d9c18d}
+.location-weather-icon{width:48px;height:48px;color:#e0c17b;border-color:#927d4d;background:#d8c28e16}
+.location-weather-data{min-height:95px}
+.location-temperature strong{font-size:58px;color:#fff}
+.location-temperature span{font-size:13px}
+.location-temperature small{font-size:11px}
+.location-weather-details{gap:12px 26px}
+.location-weather-details span{font-size:10px}
+.location-weather-details b{font-size:13px}
+.location-empty-state{min-height:75px;display:flex;align-items:center;color:#d5e4e2}
+.location-empty-state>div{display:grid;gap:7px}
+.location-empty-state strong{font-size:12px;font-weight:500}
+.location-empty-state small{font-size:9px;letter-spacing:.08em;color:#7fa9a8}
+.location-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.location-detect-button{background:#d8c18b;border-color:#e5d19c;padding:10px 15px}
+.dashboard-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:15px}
+.dashboard-shortcuts button{min-height:105px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:16px;border:1px solid #294a43;border-radius:14px;background:linear-gradient(145deg,#12342f,#0b2424);color:#d9c18b;text-align:left;transition:transform .18s,border-color .18s}
+.dashboard-shortcuts button:hover{transform:translateY(-2px);border-color:#b79c65}
+.dashboard-shortcuts button span{font:600 12px Manrope;color:#e7eee6}
+@media(max-width:850px){.dashboard-welcome{grid-template-columns:1fr .75fr}.dashboard-welcome-copy{padding-left:25px}.dashboard-coast-art{min-height:280px}}
+@media(max-width:560px){.dashboard-welcome{grid-template-columns:1fr;min-height:0}.dashboard-welcome-copy{padding:27px 20px 12px}.dashboard-welcome-copy h1{font-size:38px}.dashboard-coast-art{min-height:145px}.coast-cliff{height:95%;width:80%}.location-weather-card{padding:17px}.location-temperature strong{font-size:49px}.dashboard-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.dashboard-shortcuts button{min-height:90px;padding:13px}.dashboard-shortcuts button span{font-size:11px}}
