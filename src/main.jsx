@@ -160,10 +160,10 @@ function App() {
   };
 
   const openTaskForm = (task = null) => {
-    setFormValues(task ? {
+    setFormValues(task?.id ? {
       title: task.title, project_id: task.project_id, assigned_agent: task.assigned_agent,
       due_label: task.due_label || '', status: task.status, priority: task.priority,
-    } : { ...emptyTask, project_id: selectedProject?.id || projects[0]?.id || '' });
+    } : { ...emptyTask, project_id: task?.project_id || selectedProject?.id || projects[0]?.id || '' });
     setModal({ type: 'task', id: task?.id || null });
   };
 
@@ -285,7 +285,7 @@ function App() {
           <div className="workspace">
             <div className="section-head"><span className="label">{active}</span><button onClick={refreshWorkspace}>Sync now <RefreshCw size={14}/></button></div>
             {active === 'Dashboard' && <DashboardView projects={projects} tasks={tasks} openTasks={openTasks} completedTasks={completedTasks} projectTaskCount={projectTaskCount} onOpenProject={(id) => { setSelectedProjectId(id); setActive('Projects'); }} onNewProject={() => openProjectForm()} onNewTask={() => openTaskForm()} onToggleTask={changeTaskStatus}/>}
-            {active === 'Projects' && <ProjectsView projects={projects} selectedProject={selectedProject} tasks={tasks} projectTaskCount={projectTaskCount} onSelect={setSelectedProjectId} onNew={() => openProjectForm()} onEdit={openProjectForm} onDelete={removeProject} onNewTask={openTaskForm}/>}
+            {active === 'Projects' && <ProjectsView projects={projects} selectedProject={selectedProject} tasks={tasks} projectTaskCount={projectTaskCount} onSelect={setSelectedProjectId} onNew={() => openProjectForm()} onEdit={openProjectForm} onDelete={removeProject} onNewTask={openTaskForm} onToggleTask={changeTaskStatus}/>}
             {active === 'Tasks' && <TasksView tasks={visibleTasks} projects={projects} filter={taskFilter} setFilter={setTaskFilter} onNew={() => openTaskForm()} onEdit={openTaskForm} onDelete={removeTask} onToggle={changeTaskStatus}/>}
             {active === 'Agents' && <AgentsView/>}
             {active === 'Analytics' && <div className="analytics"><Metric icon={FolderKanban} label="Projects" value={projects.length}/><Metric icon={CheckCircle2} label="Open Tasks" value={openTasks}/><Metric icon={CheckCircle2} label="Completed Tasks" value={completedTasks}/><Metric icon={Activity} label="Completion" value={tasks.length ? Math.round(completedTasks / tasks.length * 100) + '%' : '0%'}/></div>}
@@ -330,17 +330,17 @@ function DashboardView({ projects, tasks, openTasks, completedTasks, projectTask
     <div className="section-title-row"><h2>Projects</h2><button className="secondary" onClick={onNewProject}><Plus size={15}/>Create project</button></div>
     <ProjectGrid projects={projects.slice(0, 6)} projectTaskCount={projectTaskCount} onSelect={onOpenProject}/>
     <div className="section-title-row"><h2>Recent tasks</h2><button className="secondary" onClick={onNewTask}><Plus size={15}/>Create task</button></div>
-    <TaskRows tasks={tasks.slice(-6).reverse()} onToggle={onToggleTask}/>
+    <TaskRows tasks={tasks.slice(-6).reverse()} onToggle={onToggleTask} projects={projects}/>
   </>;
 }
 
-function ProjectsView({ projects, selectedProject, tasks, projectTaskCount, onSelect, onNew, onEdit, onDelete, onNewTask }) {
+function ProjectsView({ projects, selectedProject, tasks, projectTaskCount, onSelect, onNew, onEdit, onDelete, onNewTask, onToggleTask }) {
   return <><div className="section-title-row"><h2>All projects <small>{projects.length} in your cloud workspace</small></h2><button className="primary" onClick={onNew}><Plus size={15}/>New project</button></div>
     <ProjectGrid projects={projects} projectTaskCount={projectTaskCount} onSelect={onSelect} selectedId={selectedProject?.id}/>
     {selectedProject && <div className="panel project-detail"><div className="panel-title"><div><span className="label">SELECTED PROJECT</span><h3>{selectedProject.name}</h3></div><div className="inline-actions"><button className="secondary" onClick={() => onEdit(selectedProject)}><Pencil size={14}/>Edit</button><button className="danger" onClick={() => onDelete(selectedProject)}><Trash2 size={14}/>Delete</button></div></div>
       <p>{selectedProject.description}</p><div className="detail-meta"><span>{selectedProject.type}</span><span>{selectedProject.agent}</span><span>{selectedProject.stage}</span><span>{selectedProject.progress}% progress</span></div>
       <div className="section-title-row"><h3>Project tasks</h3><button className="secondary" onClick={() => onNewTask({ project_id: selectedProject.id })}><Plus size={14}/>Add task</button></div>
-      <TaskRows tasks={tasks.filter((task) => task.project_id === selectedProject.id)} onToggle={() => {}}/>
+      <TaskRows tasks={tasks.filter((task) => task.project_id === selectedProject.id)} onToggle={onToggleTask} projects={projects} onEdit={onNewTask}/>
     </div>}
   </>;
 }
