@@ -80,6 +80,40 @@ const places = [
   {id:'santana',name:'Santana',area:'Север острова',kind:'city',tag:'Традиционная архитектура',icon:Leaf,desc:'Горный муниципалитет, известный традиционными треугольными домами.'}
 ];
 
+
+const portoMonizLinks = {
+  ru: [
+    ['Официальный портал муниципалитета','Районы, местные услуги, размещение и полезная информация','https://www.portomoniz.pt/pt/visitantes'],
+    ['Природные бассейны и пляжи','Платный комплекс, бесплатные лавовые бассейны и зоны купания','https://www.portomoniz.pt/en/visit/points-interest/beaches'],
+    ['Тропы и levadas','Fanal, Ribeira da Janela, Levada do Moinho и другие маршруты','https://www.portomoniz.pt/pt/visitantes/atividades-e-experiencias/levadas-e-veredas'],
+    ['Рестораны','Муниципальный список ресторанов и контактов','https://www.portomoniz.pt/pt/visitantes/onde-comer/restaurantes'],
+    ['Транспорт и парковки','Как добраться, мобильность, доступность и парковки','https://www.portomoniz.pt/pt/visitantes/mobilidade/como-chegar'],
+    ['События и календарь','Местные события, Semana do Mar и культурная программа','https://www.portomoniz.pt/pt/concelho/cultura/agenda-porto-moniz/evento-agenda'],
+    ['Каталог местных компаний','Компании, сервисы и местные поставщики','https://www.portomoniz.pt/pt/atividade-municipal/economia/diretorio-de-empresas'],
+    ['Visit Madeira — Porto Moniz','Официальный туристический обзор достопримечательностей','https://visitmadeira.com/en/where-to-go/madeira/points-of-interest-in-porto-moniz/']
+  ],
+  en: [
+    ['Municipal visitor portal','Parishes, local services, stays and visitor information','https://www.portomoniz.pt/pt/visitantes'],
+    ['Natural pools & beaches','Main paid complex, free lava pools and bathing areas','https://www.portomoniz.pt/en/visit/points-interest/beaches'],
+    ['Trails & levadas','Fanal, Ribeira da Janela, Levada do Moinho and local walks','https://www.portomoniz.pt/pt/visitantes/atividades-e-experiencias/levadas-e-veredas'],
+    ['Restaurants','Municipal restaurant directory and published contacts','https://www.portomoniz.pt/pt/visitantes/onde-comer/restaurantes'],
+    ['Mobility & parking','How to get here, accessibility, transport and parking','https://www.portomoniz.pt/pt/visitantes/mobilidade/como-chegar'],
+    ['Events calendar','Local events, Semana do Mar and cultural programme','https://www.portomoniz.pt/pt/concelho/cultura/agenda-porto-moniz/evento-agenda'],
+    ['Local business directory','Companies, services and local suppliers','https://www.portomoniz.pt/pt/atividade-municipal/economia/diretorio-de-empresas'],
+    ['Visit Madeira — Porto Moniz','Official regional destination and attraction guide','https://visitmadeira.com/en/where-to-go/madeira/points-of-interest-in-porto-moniz/']
+  ],
+  pt: [
+    ['Portal oficial do município','Freguesias, serviços locais, alojamento e informação útil','https://www.portomoniz.pt/pt/visitantes'],
+    ['Piscinas naturais e praias','Complexo principal, piscinas gratuitas e zonas balneares','https://www.portomoniz.pt/en/visit/points-interest/beaches'],
+    ['Levadas e veredas','Fanal, Ribeira da Janela, Levada do Moinho e percursos locais','https://www.portomoniz.pt/pt/visitantes/atividades-e-experiencias/levadas-e-veredas'],
+    ['Restaurantes','Diretório municipal de restaurantes e contactos publicados','https://www.portomoniz.pt/pt/visitantes/onde-comer/restaurantes'],
+    ['Mobilidade e estacionamento','Como chegar, acessibilidade, transportes e estacionamento','https://www.portomoniz.pt/pt/visitantes/mobilidade/como-chegar'],
+    ['Agenda de eventos','Eventos locais, Semana do Mar e programa cultural','https://www.portomoniz.pt/pt/concelho/cultura/agenda-porto-moniz/evento-agenda'],
+    ['Diretório de empresas','Empresas, serviços e fornecedores locais','https://www.portomoniz.pt/pt/atividade-municipal/economia/diretorio-de-empresas'],
+    ['Visit Madeira — Porto Moniz','Guia turístico regional oficial','https://visitmadeira.com/en/where-to-go/madeira/points-of-interest-in-porto-moniz/']
+  ]
+};
+
 const areas = [
   {name:'Funchal',note:'Столичная инфраструктура, услуги и городская жизнь'},
   {name:'Câmara de Lobos',note:'Прибрежные районы рядом с Фуншалом'},
@@ -274,7 +308,18 @@ function App(){
           <div className="bottom-promo"><div className="promo-icon"><Sparkles/></div><div><span className="eyebrow">MADEIRA AI CONCIERGE</span><h2>{t.concierge}</h2><p>{t.previewText}</p></div><button className="primary" onClick={()=>openSection('concierge')}>{t.ask}<ArrowUpRight size={16}/></button></div>
         </section>}
 
-        {active==='explore'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">EXPLORE MADEIRA</span><h1>{t.places}</h1><p>{t.intro}</p></div><div className="filter-row">{[['all',t.all],['nature',t.nature],['city',t.city],['coast',t.coast]].map(([id,label])=><button key={id} onClick={()=>setFilter(id)} className={filter===id?'filter active':'filter'}>{label}</button>)}</div><div className="places-grid">{visiblePlaces.map(placeCard)}</div><div className="map-panel"><div className="map-heading"><div><span className="eyebrow">OPENSTREETMAP</span><h2>{t.map}</h2></div><Map size={22}/></div><iframe title="Map of Madeira" src="https://www.openstreetmap.org/export/embed.html?bbox=-17.25%2C32.62%2C-16.55%2C32.95&layer=mapnik" loading="lazy"/><a href="https://www.openstreetmap.org/#map=10/32.75/-17.0" target="_blank" rel="noreferrer">Открыть карту полностью <ArrowUpRight size={13}/></a></div></section>}
+        {active==='explore'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">EXPLORE MADEIRA</span><h1>{t.places}</h1><p>{t.intro}</p></div><div className="filter-row">{[['all',t.all],['nature',t.nature],['city',t.city],['coast',t.coast]].map(([id,label])=><button key={id} onClick={()=>setFilter(id)} className={filter===id?'filter active':'filter'}>{label}</button>)}</div><div className="places-grid">{visiblePlaces.map(placeCard)}</div>
+          <section className="regional-guide">
+            <div className="regional-guide-heading"><div><span className="eyebrow">NORTH-WEST · LOCAL INTELLIGENCE</span><h2>Porto Moniz</h2><p>{lang==='ru'?'Полный гид по северо-западу Мадейры: океан, лавовые бассейны, лес Лауриссильва и местная жизнь.':lang==='pt'?'Guia do noroeste da Madeira: oceano, piscinas vulcânicas, Laurissilva e vida local.':'A guide to Madeira’s north-west: Atlantic pools, Laurissilva forest, viewpoints and local life.'}</p></div><Waves size={26}/></div>
+            <div className="regional-guide-highlights">
+              <article><b>{lang==='ru'?'Природа и океан':lang==='pt'?'Natureza e oceano':'Nature & ocean'}</b><span>Porto Moniz pools · Cachalote · Seixal · Ribeira da Janela</span></article>
+              <article><b>{lang==='ru'?'Лес и маршруты':lang==='pt'?'Floresta e percursos':'Forest & trails'}</b><span>Fanal · Laurissilva · PR 13 · PR 15</span></article>
+              <article><b>{lang==='ru'?'Четыре прихода':lang==='pt'?'Quatro freguesias':'Four parishes'}</b><span>Porto Moniz · Seixal · Ribeira da Janela · Achadas da Cruz</span></article>
+            </div>
+            <div className="regional-guide-links">{portoMonizLinks[lang].map(([title,description,url])=><a key={url} href={url} target="_blank" rel="noreferrer"><b>{title}</b><span>{description}</span><ArrowUpRight size={14}/></a>)}</div>
+            <div className="source-note"><b>{lang==='ru'?'Проверка перед поездкой:':lang==='pt'?'Antes de partir:':'Before you go:'}</b> {lang==='ru'?'погода и состояние моря — IPMA; статус троп и бронирование — IFCN. Информация о часах, тарифах и доступности меняется.':lang==='pt'?'consulte o IPMA para o tempo e estado do mar; o IFCN para o estado e reservas dos percursos. Horários e tarifas podem mudar.':'check IPMA for weather and sea conditions; check IFCN for live trail status and reservations. Hours and fees can change.'}</div>
+          </section>
+          <div className="map-panel"><div className="map-heading"><div><span className="eyebrow">OPENSTREETMAP</span><h2>{t.map}</h2></div><Map size={22}/></div><iframe title="Map of Madeira" src="https://www.openstreetmap.org/export/embed.html?bbox=-17.25%2C32.62%2C-16.55%2C32.95&layer=mapnik" loading="lazy"/><a href="https://www.openstreetmap.org/#map=10/32.75/-17.0" target="_blank" rel="noreferrer">Открыть карту полностью <ArrowUpRight size={13}/></a></div></section>}
 
         {active==='property'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">REAL ESTATE INTELLIGENCE</span><h1>{t.property}</h1><p>{t.propertyText}</p></div><div className="notice-card"><ShieldCheck size={22}/><div><b>Проверка важнее красивого объявления</b><p>До покупки участка или дома проверьте PDM муниципалитета, классификацию земли, доступ к дороге, инфраструктуру, ограничения REN/RAN и возможность лицензирования.</p></div></div><h2 className="subheading">{t.areas}</h2><div className="area-grid">{areas.map(a=><article className="area-card" key={a.name}><MapPin size={18}/><h3>{a.name}</h3><p>{a.note}</p><button onClick={()=>{setQuery(a.name);openSection('explore')}}>Изучить район <ArrowUpRight size={14}/></button></article>)}</div><div className="source-note"><b>Важно:</b> это справочник районов, а не каталог доступных объектов. Проверяйте классификацию земли и допустимость строительства по официальным документам.</div><div className="official-source-list"><h2>Официальные источники для проверки недвижимости</h2>{sources.filter(x=>x.category==='property').map(x=><a key={x.id} href={x.url} target="_blank" rel="noreferrer"><b>{x.name}</b><span>{x.description}</span><small>{x.updateNote}</small></a>)}</div></section>}
 
