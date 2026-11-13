@@ -2,3 +2,158 @@
 
 /* Live data and official source cards */
 .live-stamp{display:block;margin-top:16px;color:#a5b59f;font-size:9px}.forecast-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}.forecast-card{padding:15px;border:1px solid #30483d;border-radius:12px;background:#132521}.forecast-card>span{display:block;color:#d4c08f;font-size:11px;font-weight:700}.forecast-card>b{display:block;margin:10px 0 5px;font:700 25px Manrope;color:#edf0e7}.forecast-card>b small{font-size:15px;color:#9caca1}.forecast-card p,.forecast-card>small{display:block;color:#91a298;font-size:9px;line-height:1.6}.weather-warning{margin-top:14px}.official-source-list{margin-top:25px}.official-source-list h2{font:700 19px Manrope;margin:0 0 12px}.official-source-list>a{display:grid;gap:5px;padding:14px 16px;margin:8px 0;border:1px solid #2c453a;border-radius:11px;background:#11211e;color:#e5ece4;text-decoration:none}.official-source-list>a:hover{border-color:#a89568;background:#172923}.official-source-list>a b{font-size:11px}.official-source-list>a span{font-size:10px;color:#a1b0a5;line-height:1.6}.official-source-list>a small{font-size:9px;color:#c3b181;line-height:1.5}@media(max-width:560px){.forecast-grid{grid-template-columns:1fr}}
+
+
+/* Current location and live weather on the overview */
+.location-weather-card{display:grid;gap:14px;margin-top:16px;padding:20px 23px;border:1px solid #36534a;border-radius:16px;background:linear-gradient(105deg,#142b27 0%,#10211f 68%,#17312d 100%);box-shadow:inset 0 1px #ffffff08}
+.location-weather-heading{display:flex;align-items:center;justify-content:space-between}
+.location-weather-heading h2{font:700 18px Manrope;margin:6px 0 0;color:#edf0e7}
+.location-weather-icon{width:43px;height:43px;display:grid;place-items:center;border:1px solid #5c6145;border-radius:13px;color:#d9c28e;background:#d8c28e12}
+.location-weather-data{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.location-temperature{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:12px}
+.location-temperature strong{grid-row:span 2;font:700 43px/1 Manrope;letter-spacing:-.06em;color:#f1eddf}
+.location-temperature span{font-size:12px;color:#e3e8df}
+.location-temperature small{font-size:10px;color:#91a69a}
+.location-weather-details{display:flex;flex-wrap:wrap;gap:10px 20px}
+.location-weather-details span{display:grid;gap:4px;color:#91a69a;font-size:9px}
+.location-weather-details b{color:#e0e8df;font-size:11px}
+.location-weather-hint,.location-weather-error{margin:0;color:#9eafa4;font-size:11px;line-height:1.6}
+.location-weather-error{color:#e5a89a}
+.location-detect-button{justify-self:start;display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #6a6348;border-radius:9px;background:#d5c18e;color:#14221d;font-size:10px;font-weight:700}
+.location-detect-button:disabled{opacity:.65;cursor:wait}
+.location-weather-updated{color:#758b80;font-size:9px}
+@media(max-width:560px){.location-weather-card{padding:16px}.location-weather-data{align-items:flex-start;flex-direction:column;gap:13px}.location-weather-details{gap:9px 16px}.location-temperature strong{font-size:39px}}
+
+
+/* Premium Atlantic-inspired MADEIRA AI home dashboard */
+.dashboard-welcome{min-height:300px;display:grid;grid-template-columns:1fr .9fr;position:relative;isolation:isolate;overflow:hidden;border:1px solid #31554e;border-radius:20px;background:linear-gradient(112deg,#06283b 0%,#07516b 48%,#123b45 100%);box-shadow:0 20px 55px #0003}
+.dashboard-welcome:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 80% 18%,#77c7d455,transparent 35%),linear-gradient(180deg,#1a9dc522,#041d2b66)}
+.dashboard-welcome-copy{padding:37px 12px 34px 38px;align-self:center;z-index:1}
+.dashboard-welcome-copy h1{font:800 clamp(36px,4vw,54px)/1 Manrope,sans-serif;letter-spacing:.015em;color:#f4f5ef;margin:19px 0 13px}
+.dashboard-welcome-copy>p{max-width:440px;color:#c1d6d7;font-size:12px;line-height:1.8}
+.dashboard-welcome-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:21px}
+.dashboard-coast-art{position:relative;min-height:300px;overflow:hidden;background:linear-gradient(180deg,#46a5d2 0%,#9bd4df 42%,#076184 43%,#03445d 100%)}
+.dashboard-coast-art:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 78% 13%,#fff8 0 3%,transparent 24%),linear-gradient(180deg,transparent 48%,#002c36aa 100%)}
+.coast-sun{position:absolute;width:82px;height:82px;right:24%;top:12%;border-radius:50%;background:#f3d99a;box-shadow:0 0 70px 24px #f4d79a88}
+.coast-cliff{position:absolute;right:-8%;bottom:14%;width:83%;height:72%;background:linear-gradient(135deg,#315b47,#173e39 55%,#0c2b31);clip-path:polygon(10% 42%,28% 18%,43% 32%,56% 0,73% 15%,100% 0,100% 100%,0 100%);filter:drop-shadow(-10px 8px 10px #001c2a88)}
+.coast-cliff:after{content:"";position:absolute;inset:8% 5% 0;background:repeating-linear-gradient(165deg,transparent 0 17px,#b9a66a55 18px 20px,transparent 22px 35px);opacity:.65}
+.coast-sea{position:absolute;left:-5%;right:0;bottom:0;height:39%;background:repeating-linear-gradient(174deg,#38a5b9 0 2px,#08728e 3px 12px,#064e6c 13px 23px);clip-path:polygon(0 17%,40% 0,100% 25%,100% 100%,0 100%)}
+.dashboard-coast-art>span{position:absolute;right:17px;bottom:14px;color:#e2e6d4;font-size:8px;letter-spacing:.22em;text-shadow:0 2px 6px #001a22}
+.location-weather-card{margin-top:16px;padding:21px 23px;border-color:#31564e;background:linear-gradient(110deg,#082f42 0%,#0a2631 65%,#1a3934 100%);box-shadow:0 14px 34px #0002}
+.location-weather-heading h2{font-size:18px}
+.location-weather-heading .eyebrow{color:#d9c18d}
+.location-weather-icon{width:48px;height:48px;color:#e0c17b;border-color:#927d4d;background:#d8c28e16}
+.location-weather-data{min-height:95px}
+.location-temperature strong{font-size:58px;color:#fff}
+.location-temperature span{font-size:13px}
+.location-temperature small{font-size:11px}
+.location-weather-details{gap:12px 26px}
+.location-weather-details span{font-size:10px}
+.location-weather-details b{font-size:13px}
+.location-empty-state{min-height:75px;display:flex;align-items:center;color:#d5e4e2}
+.location-empty-state>div{display:grid;gap:7px}
+.location-empty-state strong{font-size:12px;font-weight:500}
+.location-empty-state small{font-size:9px;letter-spacing:.08em;color:#7fa9a8}
+.location-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.location-detect-button{background:#d8c18b;border-color:#e5d19c;padding:10px 15px}
+.dashboard-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:15px}
+.dashboard-shortcuts button{min-height:105px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:16px;border:1px solid #294a43;border-radius:14px;background:linear-gradient(145deg,#12342f,#0b2424);color:#d9c18b;text-align:left;transition:transform .18s,border-color .18s}
+.dashboard-shortcuts button:hover{transform:translateY(-2px);border-color:#b79c65}
+.dashboard-shortcuts button span{font:600 12px Manrope;color:#e7eee6}
+@media(max-width:850px){.dashboard-welcome{grid-template-columns:1fr .75fr}.dashboard-welcome-copy{padding-left:25px}.dashboard-coast-art{min-height:280px}}
+@media(max-width:560px){.dashboard-welcome{grid-template-columns:1fr;min-height:0}.dashboard-welcome-copy{padding:27px 20px 12px}.dashboard-welcome-copy h1{font-size:38px}.dashboard-coast-art{min-height:145px}.coast-cliff{height:95%;width:80%}.location-weather-card{padding:17px}.location-temperature strong{font-size:49px}.dashboard-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.dashboard-shortcuts button{min-height:90px;padding:13px}.dashboard-shortcuts button span{font-size:11px}}
+
+
+
+
+/* Porto Moniz regional guide */
+.regional-guide{margin-top:28px;padding:22px;border:1px solid #31554b;border-radius:17px;background:linear-gradient(145deg,#102b2b,#0c1d20 72%,#142b2b)}
+.regional-guide-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;color:#d8c18d}
+.regional-guide-heading h2{font:800 28px Manrope;margin:8px 0 5px;color:#f0f1e9}
+.regional-guide-heading p{max-width:660px;margin:0;color:#9fb4ad;font-size:11px;line-height:1.7}
+.regional-guide-highlights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
+.regional-guide-highlights article{display:grid;gap:7px;padding:13px;border:1px solid #29463e;border-radius:11px;background:#142c29}
+.regional-guide-highlights b{font-size:11px;color:#e4e9df}
+.regional-guide-highlights span{font-size:9px;line-height:1.6;color:#92a99e}
+.regional-guide-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.regional-guide-links a{display:grid;grid-template-columns:1fr auto;gap:5px 10px;align-items:center;padding:13px;border:1px solid #2a453d;border-radius:10px;text-decoration:none;background:#112421;color:#e7eee7}
+.regional-guide-links a:hover{border-color:#c5ae7c;background:#172e29}
+.regional-guide-links b{font-size:10px}
+.regional-guide-links span{grid-column:1;color:#93a99e;font-size:9px;line-height:1.5}
+.regional-guide-links svg{grid-column:2;grid-row:1/3;color:#d4bf8b}
+@media(max-width:700px){.regional-guide{padding:16px}.regional-guide-highlights,.regional-guide-links{grid-template-columns:1fr}}
+\n
+/* Porto Moniz searchable local business directory */
+.local-directory{margin-top:26px;padding:22px;border:1px solid #31554b;border-radius:17px;background:linear-gradient(145deg,#102b2b,#0b1d20 72%,#142b2b)}
+.directory-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.directory-heading h2{font:800 25px Manrope;margin:8px 0;color:#f0f1e9}
+.directory-heading p{max-width:650px;margin:0;color:#9fb4ad;font-size:11px;line-height:1.7}
+.directory-count{display:grid;min-width:76px;text-align:center;padding:10px;border:1px solid #4c614b;border-radius:12px;background:#182f2a}
+.directory-count b{font:700 25px Manrope;color:#d8c18d}.directory-count span{font-size:9px;color:#9fb4ad}
+.directory-controls{display:grid;grid-template-columns:1fr 220px;gap:9px;margin:18px 0 10px}
+.directory-controls input,.directory-controls select{min-width:0;height:40px;padding:0 12px;border:1px solid #355148;border-radius:9px;background:#0c211f;color:#e7eee7;font:inherit;font-size:11px}
+.directory-filters{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 16px}
+.directory-filters button{padding:8px 11px;border:1px solid #365147;border-radius:20px;background:#122723;color:#a8b9ae;font-size:10px;cursor:pointer}
+.directory-filters button.active{background:#d8c18b;color:#172720;border-color:#d8c18b}
+.directory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.directory-card{display:flex;flex-direction:column;min-width:0;padding:14px;border:1px solid #2b473e;border-radius:11px;background:#112421}
+.directory-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.directory-card-top>span{font-size:8px;letter-spacing:.1em;color:#d8c18d}
+.source-pill{padding:4px 7px;border-radius:12px;background:#23352e;color:#a9b9ad;font-size:8px;white-space:nowrap}
+.source-pill.municipal,.source-pill.official{background:#1e3a32;color:#b9d9bd}.source-pill.online{background:#343126;color:#ddc99b}
+.directory-card h3{margin:12px 0 6px;color:#eef0e8;font:700 14px Manrope}
+.directory-card p{margin:0 0 12px;color:#9aada2;font-size:10px;line-height:1.55;flex:1}
+.directory-address{display:flex;align-items:flex-start;gap:6px;color:#b7c5bb;font-size:9px;line-height:1.5}
+.directory-address svg{flex:none;color:#d8c18d}
+.directory-card-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:13px;padding-top:10px;border-top:1px solid #294239;color:#d8c18d;font-size:9px}
+.directory-card-footer>div{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px}
+.directory-card-footer a{display:inline-flex;align-items:center;gap:4px;color:#d8c18d;text-decoration:none}
+.directory-card-footer a:hover{color:#fff}
+.directory-footnote,.directory-empty{margin:14px 0 0;color:#81998c;font-size:9px;line-height:1.6}
+.directory-empty a{color:#d8c18d}
+@media(max-width:650px){.local-directory{padding:15px}.directory-controls{grid-template-columns:1fr}.directory-grid{grid-template-columns:1fr}.directory-heading h2{font-size:21px}.directory-card-footer{align-items:flex-start;flex-direction:column}.directory-card-footer>div{justify-content:flex-start}}
+
+
+/* Interactive Madeira island map */
+.island-map-shell{margin-top:28px;padding:20px;border:1px solid #2a4039;border-radius:16px;background:linear-gradient(145deg,#10211f,#0d1b1b);overflow:hidden}
+.island-map-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.island-map-top h2{font:700 22px Manrope;margin:7px 0 5px;color:#e8eee8}
+.island-map-top p{font-size:11px;color:#91a399;margin:0;line-height:1.6}
+.island-map-total{flex:0 0 auto;min-width:76px;padding:9px 12px;border:1px solid #4b5944;border-radius:12px;text-align:center;background:#172923}
+.island-map-total b{display:block;font:700 22px Manrope;color:#d9c28e}
+.island-map-total span{display:block;font-size:8px;color:#8ea096}
+.island-map-tools{display:grid;gap:11px;margin-bottom:13px}
+.island-map-search{display:flex;align-items:center;gap:9px;max-width:440px;padding:0 12px;border:1px solid #30473d;border-radius:10px;background:#0a1817;color:#9bad9e}
+.island-map-search input{width:100%;min-width:0;padding:11px 0;border:0;outline:0;background:transparent;color:#e8eee8;font-size:11px}
+.island-map-filters{display:flex;flex-wrap:wrap;gap:7px}
+.island-map-filters button{padding:7px 11px;border:1px solid #344a40;border-radius:99px;background:#142520;color:#a9b7ab;font-size:9px}
+.island-map-filters button.active{background:#d1bd8f;border-color:#d1bd8f;color:#17221d}
+.island-map-canvas{height:540px;width:100%;border:1px solid #334b42;border-radius:12px;overflow:hidden;background:#d9e0dc;z-index:0}
+.island-map-canvas .leaflet-control-attribution{font-size:8px}
+.island-map-pin-wrap{background:transparent;border:0}
+.madeira-map-pin{display:block;width:16px;height:16px;border:3px solid #f2eee2;border-radius:50%;background:var(--pin-color);box-shadow:0 2px 10px #0008,0 0 0 4px #09171599}
+.madeira-popup{min-width:170px;color:#17231e;font:12px 'DM Sans',sans-serif}
+.madeira-popup b{font:700 13px Manrope}
+.madeira-popup p{margin:7px 0;color:#46574e;line-height:1.5}
+.madeira-popup a{color:#536c58;font-weight:700;text-decoration:none}
+.madeira-popup ul{padding-left:17px;margin:6px 0;color:#46574e}
+.madeira-popup li{margin:3px 0}
+.island-map-legend{display:flex;flex-wrap:wrap;gap:13px;margin:13px 0 8px}
+.island-map-legend span{display:flex;align-items:center;gap:6px;color:#91a399;font-size:9px}
+.island-map-legend i{width:8px;height:8px;border-radius:50%;background:var(--legend-color)}
+.island-map-foot{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;color:#809389;font-size:9px;line-height:1.6}
+.island-map-foot a{flex:0 0 auto;display:flex;align-items:center;gap:5px;color:#d2bf91;text-decoration:none}
+.island-map-error{padding:10px 12px;margin-bottom:10px;border:1px solid #785e4b;border-radius:9px;color:#e0bda2;font-size:10px}
+@media(max-width:650px){.island-map-shell{padding:13px}.island-map-top h2{font-size:18px}.island-map-canvas{height:430px}.island-map-total{min-width:60px;padding:7px}.island-map-foot{flex-direction:column}.island-map-search{max-width:none}}
+
+
+/* Porto Moniz region folder in the Explore catalogue */
+.region-folder{width:100%;display:flex;align-items:center;gap:16px;margin:24px 0 0;padding:18px 20px;text-align:left;border:1px solid #806d48;border-radius:15px;background:linear-gradient(110deg,#142d2b 0%,#102221 68%,#1b302b 100%);color:#f0f1e9;cursor:pointer;transition:border-color .2s,transform .2s,background .2s}
+.region-folder:hover{border-color:#d8c18d;transform:translateY(-2px);background:linear-gradient(110deg,#193632,#132725 68%,#243a32)}
+.region-folder-icon{display:grid;place-items:center;flex:0 0 52px;height:52px;border:1px solid #756342;border-radius:12px;background:#213a33;color:#d8c18d}
+.region-folder-copy{display:grid;gap:4px;min-width:0;flex:1}
+.region-folder-copy small{font-size:9px;letter-spacing:1.5px;color:#d8c18d}
+.region-folder-copy b{font:800 21px Manrope;color:#f2f0e8}
+.region-folder-copy em{font-style:normal;font-size:11px;color:#9fb4ad}
+.region-folder-count{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:1px;color:#d8c18d;white-space:nowrap}
+@media(max-width:600px){.region-folder{gap:11px;padding:14px}.region-folder-icon{flex-basis:44px;height:44px}.region-folder-copy b{font-size:18px}.region-folder-copy em{font-size:10px}.region-folder-count{font-size:0}.region-folder-count svg{width:19px;height:19px}}

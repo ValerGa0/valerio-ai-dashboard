@@ -20,5 +20,5 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - run: node --check api/concierge.js && node --check api/weather.js && node --check api/sources.js
+      - run: node --check api/concierge.js && node --check api/weather.js && node --check api/sources.js && node --check api/location-weather.js
       - run: npm run build
