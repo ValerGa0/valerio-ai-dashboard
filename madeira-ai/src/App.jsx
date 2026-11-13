@@ -6,6 +6,7 @@ import {
   Sparkles, Sun, Waves, X, CloudSun, Plane, CircleUserRound, LogIn, LogOut
 } from 'lucide-react';
 import { supabase, supabaseConfigured } from './lib/supabase';
+import IslandMap from './IslandMap';
 
 const copy = {
   ru: {
@@ -369,7 +370,7 @@ function App(){
             {businessesData.length===0&&<p className="directory-empty">{lang==='ru'?'Каталог временно недоступен. Откройте официальный муниципальный список.':lang==='pt'?'Diretório temporariamente indisponível. Consulte a lista municipal oficial.':'Directory temporarily unavailable. Open the official municipal listing.'} <a href="https://www.portomoniz.pt/pt/atividade-municipal/economia/diretorio-de-empresas">Porto Moniz</a></p>}
             <div className="directory-footnote">{lang==='ru'?'Статус источника показывает происхождение записи, а не гарантию работы компании. Даты, часы, услуги, контакты и доступность требуют подтверждения.':lang==='pt'?'A etiqueta identifica a origem da informação, não garante que a empresa esteja em funcionamento. Confirme horários, serviços e contactos.':'Source labels identify where a listing came from; they do not guarantee that a business is currently operating. Verify hours, services and contact details.'}</div>
           </section>
-          <div className="map-panel"><div className="map-heading"><div><span className="eyebrow">OPENSTREETMAP</span><h2>{t.map}</h2></div><Map size={22}/></div><iframe title="Map of Madeira" src="https://www.openstreetmap.org/export/embed.html?bbox=-17.25%2C32.62%2C-16.55%2C32.95&layer=mapnik" loading="lazy"/><a href="https://www.openstreetmap.org/#map=10/32.75/-17.0" target="_blank" rel="noreferrer">Открыть карту полностью <ArrowUpRight size={13}/></a></div></section>}
+          <IslandMap businesses={businessesData} lang={lang}/></section>}
 
         {active==='property'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">REAL ESTATE INTELLIGENCE</span><h1>{t.property}</h1><p>{t.propertyText}</p></div><div className="notice-card"><ShieldCheck size={22}/><div><b>Проверка важнее красивого объявления</b><p>До покупки участка или дома проверьте PDM муниципалитета, классификацию земли, доступ к дороге, инфраструктуру, ограничения REN/RAN и возможность лицензирования.</p></div></div><h2 className="subheading">{t.areas}</h2><div className="area-grid">{areas.map(a=><article className="area-card" key={a.name}><MapPin size={18}/><h3>{a.name}</h3><p>{a.note}</p><button onClick={()=>{setQuery(a.name);openSection('explore')}}>Изучить район <ArrowUpRight size={14}/></button></article>)}</div><div className="source-note"><b>Важно:</b> это справочник районов, а не каталог доступных объектов. Проверяйте классификацию земли и допустимость строительства по официальным документам.</div><div className="official-source-list"><h2>Официальные источники для проверки недвижимости</h2>{sources.filter(x=>x.category==='property').map(x=><a key={x.id} href={x.url} target="_blank" rel="noreferrer"><b>{x.name}</b><span>{x.description}</span><small>{x.updateNote}</small></a>)}</div></section>}
 
