@@ -27,7 +27,7 @@ const copy = {
     askPlaceholder:'Спросите о Мадейре…', send:'Отправить',
     preview:'Источники данных', previewText:'Официальные источники Мадейры и погодные данные IPMA уже подключены в серверном коде. Для активации AI-консьержа требуется настроить серверный ключ OpenAI.',
     author:'Создано VALÉRIO',
-    locationTitle:'Погода рядом с вами', locate:'Определить моё местоположение', locating:'Определяем местоположение…', refreshLocation:'Обновить', feelsLike:'Ощущается как', humidity:'Влажность', wind:'Ветер', locationPermission:'Разрешите доступ к геолокации в браузере.', locationUnavailable:'Геолокация недоступна на этом устройстве.', locationFailed:'Не удалось определить местоположение. Проверьте разрешение браузера.'
+    locationTitle:'Погода рядом с вами', locationHint:'{t.locationHint}', locate:'Определить моё местоположение', locating:'Определяем местоположение…', refreshLocation:'Обновить', feelsLike:'Ощущается как', humidity:'Влажность', wind:'Ветер', locationPermission:'Разрешите доступ к геолокации в браузере.', locationUnavailable:'Геолокация недоступна на этом устройстве.', locationFailed:'Не удалось определить местоположение. Проверьте разрешение браузера.'
   },
   en: {
     nav:['Overview','Explore','Real estate','Travel','Business & invest','Transport','Weather','AI concierge'],
@@ -47,7 +47,7 @@ const copy = {
     askPlaceholder:'Ask about Madeira…', send:'Send',
     preview:'Data sources', previewText:'Official Madeira sources and IPMA weather data are wired into the server. The OpenAI server key must be configured to activate the AI concierge.',
     author:'Created by VALÉRIO',
-    locationTitle:'Weather near you', locate:'Use my location', locating:'Finding your location…', refreshLocation:'Refresh', feelsLike:'Feels like', humidity:'Humidity', wind:'Wind', locationPermission:'Allow location access in your browser.', locationUnavailable:'Geolocation is unavailable on this device.', locationFailed:'Could not determine your location. Check browser permission.'
+    locationTitle:'Weather near you', locationHint:'Use the button to show local weather and your city using GPS.', locate:'Use my location', locating:'Finding your location…', refreshLocation:'Refresh', feelsLike:'Feels like', humidity:'Humidity', wind:'Wind', locationPermission:'Allow location access in your browser.', locationUnavailable:'Geolocation is unavailable on this device.', locationFailed:'Could not determine your location. Check browser permission.'
   },
   pt: {
     nav:['Visão geral','Explorar','Imobiliário','Viagens','Negócios e investimento','Transportes','Tempo','Assistente IA'],
@@ -67,7 +67,7 @@ const copy = {
     askPlaceholder:'Pergunte sobre a Madeira…', send:'Enviar',
     preview:'Fontes de dados', previewText:'As fontes oficiais da Madeira e os dados meteorológicos do IPMA já estão ligados no servidor. É necessário configurar a chave OpenAI no servidor para ativar o assistente IA.',
     author:'Criado por VALÉRIO',
-    locationTitle:'Meteorologia perto de si', locate:'Usar a minha localização', locating:'A determinar localização…', refreshLocation:'Atualizar', feelsLike:'Sensação térmica', humidity:'Humidade', wind:'Vento', locationPermission:'Permita o acesso à localização no navegador.', locationUnavailable:'A geolocalização não está disponível neste dispositivo.', locationFailed:'Não foi possível determinar a localização. Verifique a permissão do navegador.'
+    locationTitle:'Meteorologia perto de si', locationHint:'Toque no botão para ver o tempo local e a sua cidade por GPS.', locate:'Usar a minha localização', locating:'A determinar localização…', refreshLocation:'Atualizar', feelsLike:'Sensação térmica', humidity:'Humidade', wind:'Vento', locationPermission:'Permita o acesso à localização no navegador.', locationUnavailable:'A geolocalização não está disponível neste dispositivo.', locationFailed:'Não foi possível determinar a localização. Verifique a permissão do navegador.'
   }
 };
 
