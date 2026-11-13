@@ -63,7 +63,8 @@ function App() {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [query, setQuery] = useState('');
   const [chatInput, setChatInput] = useState('');
-  const [chat, setChat] = useState([{ role: 'ai', text: 'Здравствуйте! Я VALÉRIO AI Manager. Выберите проект или задачу — помогу определить следующий шаг.' }]);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chat, setChat] = useState([{ role: 'ai', text: 'Здравствуйте! Я VALÉRIO AI Manager. Я подключён к AI Gateway и готов помогать с вашими проектами.' }]);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [taskTitle, setTaskTitle] = useState('');
   const [mobileNav, setMobileNav] = useState(false);
@@ -129,12 +130,41 @@ function App() {
     setSelectedProject((current) => current ? { ...current, tasks: current.tasks + 1 } : current);
     setTaskTitle(''); setShowTaskForm(false); setPage('Tasks'); notify('Задача сохранена в облаке');
   };
-  const sendChat = () => {
-    if (!chatInput.trim()) return;
+  const sendChat = async () => {
     const prompt = chatInput.trim();
-    setChat((current) => [...current, { role: 'user', text: prompt }, { role: 'ai', text: 'Запрос принят. Следующий шаг: уточнить результат, назначить ответственного агента и разбить работу на проверяемые задачи. Подключение реальной модели AI Gateway будет следующим этапом.' }]);
+    if (!prompt || chatLoading || !session?.access_token) return;
+    const history = [...chat, { role: 'user', text: prompt }];
+    setChat((current) => [...current, { role: 'user', text: prompt }, { role: 'ai', text: '' }]);
     setChatInput('');
+    setChatLoading(true);
     setPage('AI Manager');
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+        body: JSON.stringify({ messages: history.map((item) => ({ role: item.role === 'ai' ? 'assistant' : 'user', content: item.text })) }),
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || 'Ошибка AI Gateway (' + response.status + ')');
+      }
+      if (!response.body) throw new Error('Потоковый ответ недоступен.');
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let answer = '';
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        answer += decoder.decode(value, { stream: true });
+        setChat((current) => current.map((item, index) => index === current.length - 1 ? { ...item, text: answer } : item));
+      }
+      answer += decoder.decode();
+      setChat((current) => current.map((item, index) => index === current.length - 1 ? { ...item, text: answer || 'Модель вернула пустой ответ.' } : item));
+    } catch (error) {
+      setChat((current) => current.map((item, index) => index === current.length - 1 ? { ...item, text: 'Не удалось получить ответ: ' + (error.message || 'неизвестная ошибка') } : item));
+    } finally {
+      setChatLoading(false);
+    }
   };
   const filteredProjects = useMemo(() => projects.filter((project) => (project.name + ' ' + project.type).toLowerCase().includes(query.toLowerCase())), [projects, query]);
   const completed = tasks.filter((task) => task.done).length;
@@ -220,7 +250,7 @@ function App() {
         {page === 'Tasks' && <section className="section-block"><SectionTitle title="УПРАВЛЕНИЕ ЗАДАЧАМИ" action="Новая задача" onAction={() => setShowTaskForm(true)}/><TaskList tasks={tasks} toggleTask={toggleTask}/></section>}
         {page === 'AI Agents' && <section className="section-block"><SectionTitle title="ШЕСТЬ СПЕЦИАЛИСТОВ VALÉRIO"/><div className="agents-grid large">{agents.map((agent) => <button key={agent.id} className="agent-card" onClick={() => openAgent(agent)}><span className={'agent-emblem ' + agent.color}>{agent.icon}</span><b>{agent.name}</b><small>{agent.role}</small><span className="agent-online"><i/>{agent.status}</span><span className="agent-open">Открыть <ArrowRight size={13}/></span></button>)}</div></section>}
         {page === 'Agent workspace' && <section className="section-block agent-workspace"><span className={'agent-emblem big ' + (selectedAgent?.color || 'gold')}>{selectedAgent?.icon || 'V'}</span><span className="eyebrow">SPECIALIST WORKSPACE</span><h2>{selectedAgent?.name || 'AI Agent'}</h2><p>{selectedAgent?.role}</p><div className="agent-focus"><b>Текущий фокус</b><span>{selectedAgent?.task}</span></div><button className="gold-button" onClick={() => setPage('AI Manager')}><MessageSquare size={16}/>Открыть диалог с агентом</button></section>}
-        {page === 'AI Manager' && <section className="section-block chat-panel"><div className="chat-heading"><span className="agent-emblem gold">V</span><div><b>VALÉRIO AI Manager</b><small>Центральный координатор экосистемы</small></div></div><div className="chat-messages">{chat.map((message, i) => <div key={i} className={'chat-bubble ' + message.role}>{message.text}</div>)}</div><div className="chat-compose"><input value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && sendChat()} placeholder="Напишите запрос AI Manager..."/><button onClick={sendChat}><Send size={16}/></button></div><small className="disclaimer">Сейчас работает интерфейс диалога. Подключение реальной модели через Vercel AI Gateway — отдельный следующий этап.</small></section>}
+        {page === 'AI Manager' && <section className="section-block chat-panel"><div className="chat-heading"><span className="agent-emblem gold">V</span><div><b>VALÉRIO AI Manager</b><small>Центральный координатор экосистемы</small></div></div><div className="chat-messages">{chat.map((message, i) => <div key={i} className={'chat-bubble ' + message.role}>{message.text || (chatLoading && i === chat.length - 1 ? 'Думаю…' : '')}</div>)}</div><div className="chat-compose"><input value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !chatLoading && sendChat()} placeholder="Напишите запрос AI Manager..." disabled={chatLoading}/><button onClick={sendChat} disabled={chatLoading || !chatInput.trim()}><Send size={16}/></button></div><small className="disclaimer">AI Gateway · OpenAI GPT-5.4 Mini · защищённый потоковый ответ</small></section>}
         {page === 'Calendar' && <section className="section-block"><SectionTitle title="КАЛЕНДАРЬ VALÉRIO"/>{['Сегодня · Проверка Dashboard','14 ноября · Brand System review','16 ноября · Madeira research checkpoint','18 ноября · Social content approval'].map((event) => <div className="calendar-row" key={event}><CalendarDays size={17}/>{event}</div>)}</section>}
         {page === 'Files' && <section className="section-block"><SectionTitle title="ФАЙЛЫ И ДОКУМЕНТЫ" action="Загрузить файл" onAction={() => notify('Загрузка файлов подключается следующим этапом')}/>{['VALÉRIO Master Plan','Brand Book','Dashboard UI System','Madeira Research','AI Agents Operating Rules'].map((file) => <div className="calendar-row" key={file}><FileText size={17}/>{file}<span>Ожидает подключения хранилища</span></div>)}</section>}
         {page === 'Analytics' && <section className="section-block"><SectionTitle title="АНАЛИТИКА VALÉRIO OS"/><div className="metrics-grid"><Metric icon={Gauge} label="Средний прогресс проектов" value="67%"/><Metric icon={CheckSquare} label="Задачи выполнены" value={completed + '/' + tasks.length}/><Metric icon={Users} label="Активные агенты" value="6/6"/><Metric icon={Activity} label="Активность" value="Live UI"/></div></section>}
