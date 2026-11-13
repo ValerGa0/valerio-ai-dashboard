@@ -37,3 +37,12 @@ The Supabase project has dedicated `public.valerio_projects` and `public.valerio
 ### Current build scope
 
 The dashboard UI includes responsive navigation, six specialist agent workspaces, project cards, task lists, activity, calendar, analytics, quick actions, and an AI Manager conversation surface. Live AI generation and complete authenticated CRUD wiring are follow-up implementation slices.
+
+
+## AI Manager — Vercel AI Gateway
+
+The dashboard's `/api/chat` serverless function streams responses from Vercel AI Gateway using the AI SDK. Requests require a valid Supabase session; the server validates the bearer token before sending prompts to the model. The model is configured with `AI_GATEWAY_MODEL` (currently `openai/gpt-5.4-mini`, selected from the live Gateway model catalog).
+
+On Vercel, AI Gateway authentication uses the deployment's Vercel OIDC token. For local development outside Vercel, set `AI_GATEWAY_API_KEY` in the ignored `.env.local` file. Never put this secret in a `VITE_*` variable or commit it.
+
+Run the Vite UI locally with `npm run dev`. To exercise the serverless endpoint locally, use Vercel's local development runtime so `/api/chat` is served as a function.
