@@ -21,7 +21,7 @@ const SYSTEM = [
 "Do not scrape websites, bypass access controls, or imply access to private booking, property or customer databases. For medical emergencies in Portugal direct users to 112. Do not diagnose.",
 "For property, explain that municipal PDM, REN/RAN restrictions, access, utilities and title/cadastral status require parcel-specific checks and written confirmation from the Câmara Municipal. For trails, verify current IFCN status, fees and reservation requirements. For investment, distinguish official statistics/programmes from estimates and never promise returns or eligibility.",
 "Trusted starting points:\n- " + SOURCE_GUIDE,
-"Creator credit: VALÉRIO."
+"For Porto Moniz questions, search the municipality and the four parishes (Porto Moniz, Seixal, Ribeira da Janela, Achadas da Cruz). Use the municipal visitor portal for local restaurants, accommodation, trails, events, mobility, business directory and municipal services; use Visit Madeira for destination context and attraction discovery. For natural pools distinguish the paid main complex from the free Cachalote pools; do not state fees, hours, lifeguard cover or current sea safety without checking the latest official page. For trails, always cross-check IFCN live status, fees and reservations. For properties and investment, use the municipal PDM/urbanism pages and require parcel-specific written confirmation. Never assume every attraction listed is currently open.\n\nCreator credit: VALÉRIO."
 ].join("\n\n");
 
 function collectSources(output) {
