@@ -244,16 +244,21 @@ function App(){
       {renderHeader()}
       <div className="page-content">
         {active==='overview'&&<section>
-          <div className="hero">
-            <div className="hero-copy"><div className="eyebrow"><span/> {t.eyebrow}</div><h1>{t.headline.split('\n').map((s,i)=><React.Fragment key={s}>{i>0&&<br/>}{s}</React.Fragment>)}</h1><p>{t.intro}</p><div className="hero-actions"><button className="primary" onClick={()=>openSection('explore')}>{t.explore}<ArrowUpRight size={16}/></button><button className="ghost" onClick={()=>openSection('concierge')}><Sparkles size={16}/>{t.ask}</button></div><div className="hero-foot"><span className="avatar-stack"><i>✦</i><i>⌂</i><i>↗</i></span>{t.forAll}</div></div>
-            <div className="hero-visual"><div className="sun-glow"/><div className="hero-orbit orbit-one"/><div className="hero-orbit orbit-two"/><div className="hero-island"><Mountain size={88} strokeWidth={1}/><Waves size={50} strokeWidth={1}/></div><div className="floating-chip chip-top"><MapPin size={14}/> 32° 45′ N · 16° 57′ W</div><div className="floating-chip chip-bottom"><Sun size={15}/> Atlantic · Madeira</div><div className="hero-caption">ATLANTIC<br/><b>MADEIRA</b></div></div>
+          <div className="dashboard-welcome">
+            <div className="dashboard-welcome-copy"><span className="eyebrow"><span/> MADEIRA · ATLANTIC ISLAND</span><h1>MADEIRA AI</h1><p>{t.intro}</p><div className="dashboard-welcome-actions"><button className="primary" onClick={()=>openSection('explore')}>{t.explore}<ArrowUpRight size={16}/></button><button className="ghost" onClick={()=>openSection('concierge')}><Sparkles size={16}/>{t.ask}</button></div></div>
+            <div className="dashboard-coast-art"><div className="coast-sun"/><div className="coast-cliff"/><div className="coast-sea"/><span>ATLANTIC · PORTUGAL</span></div>
           </div>
           <div className="location-weather-card">
             <div className="location-weather-heading"><div><span className="eyebrow">LIVE · LOCAL WEATHER</span><h2>{t.locationTitle}</h2></div><div className="location-weather-icon"><CloudSun size={27}/></div></div>
-            {locationWeather? <div className="location-weather-data"><div className="location-temperature"><strong>{Math.round(locationWeather.current.temperatureC)}°</strong><span>{weatherDescription(locationWeather.current.weatherCode)}</span><small>{locationWeather.location.name}{locationWeather.location.country?', '+locationWeather.location.country:''}</small></div><div className="location-weather-details"><span>{t.feelsLike} <b>{Math.round(locationWeather.current.feelsLikeC)}°C</b></span><span>{t.humidity} <b>{locationWeather.current.humidity}%</b></span><span>{t.wind} <b>{Math.round(locationWeather.current.windKmh)} km/h</b></span></div></div>:<p className="location-weather-hint">{t.locationHint}</p>}
+            {locationWeather? <div className="location-weather-data"><div className="location-temperature"><strong>{Math.round(locationWeather.current.temperatureC)}°</strong><span>{weatherDescription(locationWeather.current.weatherCode)}</span><small>{locationWeather.location.name}{locationWeather.location.country?', '+locationWeather.location.country:''}</small></div><div className="location-weather-details"><span>{t.feelsLike} <b>{Math.round(locationWeather.current.feelsLikeC)}°C</b></span><span>{t.humidity} <b>{locationWeather.current.humidity}%</b></span><span>{t.wind} <b>{Math.round(locationWeather.current.windKmh)} km/h</b></span></div></div>:<div className="location-empty-state"><div><strong>{t.locationHint}</strong><small>GPS · Open-Meteo · Live conditions</small></div></div>}
             {locationError&&<p className="location-weather-error" role="status">{locationError}</p>}
-            <button className="location-detect-button" onClick={detectLocation} disabled={locationBusy}><Navigation size={15}/>{locationBusy?t.locating:locationWeather?t.refreshLocation:t.locate}</button>
-            {locationWeather&&<small className="location-weather-updated">Open-Meteo · {new Date(locationWeather.fetchedAt).toLocaleTimeString()}</small>}
+            <div className="location-actions"><button className="location-detect-button" onClick={detectLocation} disabled={locationBusy}><Navigation size={15}/>{locationBusy?t.locating:locationWeather?t.refreshLocation:t.locate}</button>{locationWeather&&<small className="location-weather-updated">Open-Meteo · {new Date(locationWeather.fetchedAt).toLocaleTimeString()}</small>}</div>
+          </div>
+          <div className="dashboard-shortcuts">
+            <button onClick={()=>openSection('explore')}><Map size={22}/><span>Карта острова</span></button>
+            <button onClick={()=>openSection('travel')}><Compass size={22}/><span>Маршруты</span></button>
+            <button onClick={()=>openSection('invest')}><BriefcaseBusiness size={22}/><span>Возможности</span></button>
+            <button onClick={()=>openSection('weather')}><CloudSun size={22}/><span>Прогноз</span></button>
           </div>
           <div className="section-heading"><div><span className="eyebrow">{t.discover}</span><h2>{t.quick}</h2></div><span className="subtle-tag">01 / 08</span></div>
           <div className="feature-grid">
