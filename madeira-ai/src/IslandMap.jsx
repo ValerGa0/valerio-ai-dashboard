@@ -61,6 +61,7 @@ export default function IslandMap({businesses=[],lang='ru'}){
   const [category,setCategory]=useState('all');
   const [query,setQuery]=useState('');
   const [mapError,setMapError]=useState('');
+  const [mapReady,setMapReady]=useState(false);
   const labels=categoryLabels[lang]||categoryLabels.ru;
   const localGroups=useMemo(()=>{
     const groups=[
@@ -86,9 +87,10 @@ export default function IslandMap({businesses=[],lang='ru'}){
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
       layerRef.current=L.layerGroup().addTo(map);
       mapRef.current=map;
+      setMapReady(true);
       requestAnimationFrame(()=>map.invalidateSize());
     }).catch(()=>{if(!disposed)setMapError(lang==='ru'?'Не удалось загрузить карту. Проверьте подключение к интернету.':'The map could not be loaded. Check your internet connection.');});
-    return ()=>{disposed=true;if(mapRef.current){mapRef.current.remove();mapRef.current=null;layerRef.current=null;}};
+    return ()=>{disposed=true;if(mapRef.current){mapRef.current.remove();mapRef.current=null;layerRef.current=null;setMapReady(false);}};
   },[]);
 
   useEffect(()=>{
@@ -109,7 +111,7 @@ export default function IslandMap({businesses=[],lang='ru'}){
       const html='<div class="madeira-popup"><b>'+escapeHtml(g.name)+' · '+g.items.length+'</b><p>'+(lang==='ru'?'Приблизительная зона прихода, не точка входа в конкретное заведение.':lang==='pt'?'Zona aproximada da freguesia, não a localização exata de cada estabelecimento.':'Approximate parish area, not the exact entrance of each business.')+'</p><ul>'+list+'</ul>'+(g.items.length>10?'<small>+'+(g.items.length-10)+' '+(lang==='ru'?'записей':'more')+'</small>':'')+'</div>';
       addPin(g.lat,g.lng,'local',html);
     });
-  },[markers,lang]);
+  },[markers,lang,mapReady]);
 
   return <section className="island-map-shell">
     <div className="island-map-top">
