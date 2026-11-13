@@ -2,3 +2,24 @@
 
 /* Live data and official source cards */
 .live-stamp{display:block;margin-top:16px;color:#a5b59f;font-size:9px}.forecast-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}.forecast-card{padding:15px;border:1px solid #30483d;border-radius:12px;background:#132521}.forecast-card>span{display:block;color:#d4c08f;font-size:11px;font-weight:700}.forecast-card>b{display:block;margin:10px 0 5px;font:700 25px Manrope;color:#edf0e7}.forecast-card>b small{font-size:15px;color:#9caca1}.forecast-card p,.forecast-card>small{display:block;color:#91a298;font-size:9px;line-height:1.6}.weather-warning{margin-top:14px}.official-source-list{margin-top:25px}.official-source-list h2{font:700 19px Manrope;margin:0 0 12px}.official-source-list>a{display:grid;gap:5px;padding:14px 16px;margin:8px 0;border:1px solid #2c453a;border-radius:11px;background:#11211e;color:#e5ece4;text-decoration:none}.official-source-list>a:hover{border-color:#a89568;background:#172923}.official-source-list>a b{font-size:11px}.official-source-list>a span{font-size:10px;color:#a1b0a5;line-height:1.6}.official-source-list>a small{font-size:9px;color:#c3b181;line-height:1.5}@media(max-width:560px){.forecast-grid{grid-template-columns:1fr}}
+
+
+/* Current location and live weather on the overview */
+.location-weather-card{display:grid;gap:14px;margin-top:16px;padding:20px 23px;border:1px solid #36534a;border-radius:16px;background:linear-gradient(105deg,#142b27 0%,#10211f 68%,#17312d 100%);box-shadow:inset 0 1px #ffffff08}
+.location-weather-heading{display:flex;align-items:center;justify-content:space-between}
+.location-weather-heading h2{font:700 18px Manrope;margin:6px 0 0;color:#edf0e7}
+.location-weather-icon{width:43px;height:43px;display:grid;place-items:center;border:1px solid #5c6145;border-radius:13px;color:#d9c28e;background:#d8c28e12}
+.location-weather-data{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.location-temperature{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:12px}
+.location-temperature strong{grid-row:span 2;font:700 43px/1 Manrope;letter-spacing:-.06em;color:#f1eddf}
+.location-temperature span{font-size:12px;color:#e3e8df}
+.location-temperature small{font-size:10px;color:#91a69a}
+.location-weather-details{display:flex;flex-wrap:wrap;gap:10px 20px}
+.location-weather-details span{display:grid;gap:4px;color:#91a69a;font-size:9px}
+.location-weather-details b{color:#e0e8df;font-size:11px}
+.location-weather-hint,.location-weather-error{margin:0;color:#9eafa4;font-size:11px;line-height:1.6}
+.location-weather-error{color:#e5a89a}
+.location-detect-button{justify-self:start;display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #6a6348;border-radius:9px;background:#d5c18e;color:#14221d;font-size:10px;font-weight:700}
+.location-detect-button:disabled{opacity:.65;cursor:wait}
+.location-weather-updated{color:#758b80;font-size:9px}
+@media(max-width:560px){.location-weather-card{padding:16px}.location-weather-data{align-items:flex-start;flex-direction:column;gap:13px}.location-weather-details{gap:9px 16px}.location-temperature strong{font-size:39px}}
