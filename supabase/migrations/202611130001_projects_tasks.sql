@@ -36,7 +36,7 @@ create table if not exists public.tasks (
   constraint tasks_project_owner_fkey
     foreign key (project_id, user_id)
     references public.projects (id, user_id) on delete cascade,
-  constraint tasks_user_title_key unique (user_id, title)
+  constraint tasks_user_project_title_key unique (user_id, project_id, title)
 );
 
 create index if not exists projects_user_created_idx
