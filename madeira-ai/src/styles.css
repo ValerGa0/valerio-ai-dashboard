@@ -145,3 +145,15 @@
 .island-map-foot a{flex:0 0 auto;display:flex;align-items:center;gap:5px;color:#d2bf91;text-decoration:none}
 .island-map-error{padding:10px 12px;margin-bottom:10px;border:1px solid #785e4b;border-radius:9px;color:#e0bda2;font-size:10px}
 @media(max-width:650px){.island-map-shell{padding:13px}.island-map-top h2{font-size:18px}.island-map-canvas{height:430px}.island-map-total{min-width:60px;padding:7px}.island-map-foot{flex-direction:column}.island-map-search{max-width:none}}
+
+
+/* Porto Moniz region folder in the Explore catalogue */
+.region-folder{width:100%;display:flex;align-items:center;gap:16px;margin:24px 0 0;padding:18px 20px;text-align:left;border:1px solid #806d48;border-radius:15px;background:linear-gradient(110deg,#142d2b 0%,#102221 68%,#1b302b 100%);color:#f0f1e9;cursor:pointer;transition:border-color .2s,transform .2s,background .2s}
+.region-folder:hover{border-color:#d8c18d;transform:translateY(-2px);background:linear-gradient(110deg,#193632,#132725 68%,#243a32)}
+.region-folder-icon{display:grid;place-items:center;flex:0 0 52px;height:52px;border:1px solid #756342;border-radius:12px;background:#213a33;color:#d8c18d}
+.region-folder-copy{display:grid;gap:4px;min-width:0;flex:1}
+.region-folder-copy small{font-size:9px;letter-spacing:1.5px;color:#d8c18d}
+.region-folder-copy b{font:800 21px Manrope;color:#f2f0e8}
+.region-folder-copy em{font-style:normal;font-size:11px;color:#9fb4ad}
+.region-folder-count{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:1px;color:#d8c18d;white-space:nowrap}
+@media(max-width:600px){.region-folder{gap:11px;padding:14px}.region-folder-icon{flex-basis:44px;height:44px}.region-folder-copy b{font-size:18px}.region-folder-copy em{font-size:10px}.region-folder-count{font-size:0}.region-folder-count svg{width:19px;height:19px}}

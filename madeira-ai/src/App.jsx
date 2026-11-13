@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Anchor, ArrowUpRight, Bookmark, BriefcaseBusiness, Building2, CarFront,
+  Anchor, ArrowUpRight, Bookmark, BriefcaseBusiness, Building2, CarFront, FolderOpen,
   Check, ChevronDown, Compass, Globe2, Hotel, Languages, Leaf, Map,
   MapPin, Menu, MessageCircle, Navigation, Mountain, Search, Send, ShieldCheck,
   Sparkles, Sun, Waves, X, CloudSun, Plane, CircleUserRound, LogIn, LogOut
@@ -352,8 +352,13 @@ function App(){
         </section>}
 
         {active==='explore'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">EXPLORE MADEIRA</span><h1>{t.places}</h1><p>{t.intro}</p></div><div className="filter-row">{[['all',t.all],['nature',t.nature],['city',t.city],['coast',t.coast]].map(([id,label])=><button key={id} onClick={()=>setFilter(id)} className={filter===id?'filter active':'filter'}>{label}</button>)}</div><div className="places-grid">{visiblePlaces.map(placeCard)}</div>
-          <section className="regional-guide">
-            <div className="regional-guide-heading"><div><span className="eyebrow">NORTH-WEST · LOCAL INTELLIGENCE</span><h2>Porto Moniz</h2><p>{lang==='ru'?'Полный гид по северо-западу Мадейры: океан, лавовые бассейны, лес Лауриссильва и местная жизнь.':lang==='pt'?'Guia do noroeste da Madeira: oceano, piscinas vulcânicas, Laurissilva e vida local.':'A guide to Madeira’s north-west: Atlantic pools, Laurissilva forest, viewpoints and local life.'}</p></div><Waves size={26}/></div>
+          <button className="region-folder" type="button" onClick={()=>document.getElementById('porto-moniz-guide')?.scrollIntoView({behavior:'smooth',block:'start'})}>
+            <span className="region-folder-icon"><FolderOpen size={25}/></span>
+            <span className="region-folder-copy"><small>NORTH-WEST · LOCAL INTELLIGENCE</small><b>Porto Moniz</b><em>{lang==='ru'?'Открыть региональный гид и местный каталог':lang==='pt'?'Abrir o guia regional e o diretório local':'Open regional guide & local directory'}</em></span>
+            <span className="region-folder-count">{lang==='ru'?'ГИД + КАТАЛОГ':lang==='pt'?'GUIA + DIRETÓRIO':'GUIDE + DIRECTORY'} <ArrowUpRight size={17}/></span>
+          </button>
+          <section className="regional-guide" id="porto-moniz-guide">
+            <div className="regional-guide-heading"><div><span className="eyebrow">NORTH-WEST · LOCAL INTELLIGENCE</span><h2>Porto Moniz</h2><p>{lang==='ru'?'Гид по северо-западу Мадейры: Атлантический океан, природные лавовые бассейны, лес Лауриссильва и жизнь местных общин.':lang==='pt'?'Guia do noroeste da Madeira: Oceano Atlântico, piscinas naturais de origem vulcânica, floresta Laurissilva e vida das comunidades locais.':'A guide to north-west Madeira: the Atlantic Ocean, natural volcanic pools, Laurissilva forest and local community life.'}</p></div><Waves size={26}/></div>
             <div className="regional-guide-highlights">
               <article><b>{lang==='ru'?'Природа и океан':lang==='pt'?'Natureza e oceano':'Nature & ocean'}</b><span>Porto Moniz pools · Cachalote · Seixal · Ribeira da Janela</span></article>
               <article><b>{lang==='ru'?'Лес и маршруты':lang==='pt'?'Floresta e percursos':'Forest & trails'}</b><span>Fanal · Laurissilva · PR 13 · PR 15</span></article>
