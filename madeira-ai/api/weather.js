@@ -1,11 +1,6 @@
 const LOCATIONS = [
+  // These location identifiers are confirmed in IPMA's official districts/islands catalogue.
   { id: 2310300, name: "Funchal" },
-  { id: 2310100, name: "Machico" },
-  { id: 2310200, name: "Santa Cruz" },
-  { id: 2310500, name: "Ponta do Sol" },
-  { id: 2310600, name: "Porto Moniz" },
-  { id: 2310700, name: "São Vicente" },
-  { id: 2310800, name: "Santana" },
   { id: 2320100, name: "Porto Santo" }
 ];
 
@@ -31,7 +26,8 @@ export default async function handler(req, res) {
     ]);
     const rawWarnings = warningResponse.ok ? await warningResponse.json() : [];
     const warnings = Array.isArray(rawWarnings) ? rawWarnings.filter(w => String(w.idAreaAviso || "").toUpperCase() === "MCS") : [];
-    return res.status(200).setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate=3600").json({
+    res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate=3600");
+    return res.status(200).json({
       provider: "IPMA", fetchedAt: new Date().toISOString(), sourceUrl: "https://api.ipma.pt/",
       locations, warnings
     });
