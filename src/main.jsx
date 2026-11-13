@@ -99,7 +99,7 @@ function App() {
 
   return <div className="app-shell">
     <aside className={'sidebar ' + (mobileNav ? 'sidebar-open' : '')}>
-      <button className="brand" onClick={() => setPage('Dashboard')}><span className="brand-mark">V</span><span className="brand-copy"><b>VALÉRIO AI</b><small>COMMAND CENTER</small></span><button className="mobile-close" onClick={(e) => { e.stopPropagation(); setMobileNav(false); }}><X size={16}/></button></button>
+      <button className="brand" onClick={() => setPage('Dashboard')}><span className="brand-mark">V</span><span className="brand-copy"><b>VALÉRIO AI</b><small>COMMAND CENTER</small></span><span className="mobile-close" aria-hidden="true"><X size={16}/></span></button>
       <div className="nav-label">MAIN</div>
       <nav className="main-nav">{nav.map(([label, Icon]) => <button key={label} className={'nav-link ' + (page === label ? 'active' : '')} onClick={() => { setPage(label); setMobileNav(false); }}><Icon size={17}/><span>{label}</span>{label === 'Tasks' && <em>{tasks.filter(t => !t.done).length}</em>}</button>)}</nav>
       <div className="nav-label agent-label">AI AGENTS</div>
