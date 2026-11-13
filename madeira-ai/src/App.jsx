@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   Anchor, ArrowUpRight, Bookmark, BriefcaseBusiness, Building2, CarFront,
   Check, ChevronDown, Compass, Globe2, Hotel, Languages, Leaf, Map,
-  MapPin, Menu, MessageCircle, Mountain, Search, Send, ShieldCheck,
+  MapPin, Menu, MessageCircle, Navigation, Mountain, Search, Send, ShieldCheck,
   Sparkles, Sun, Waves, X, CloudSun, Plane, CircleUserRound, LogIn, LogOut
 } from 'lucide-react';
 import { supabase, supabaseConfigured } from './lib/supabase';
@@ -26,7 +26,8 @@ const copy = {
     all:'Все', nature:'Природа', city:'Города', coast:'Побережье',
     askPlaceholder:'Спросите о Мадейре…', send:'Отправить',
     preview:'Источники данных', previewText:'Официальные источники Мадейры и погодные данные IPMA уже подключены в серверном коде. Для активации AI-консьержа требуется настроить серверный ключ OpenAI.',
-    author:'Создано VALÉRIO'
+    author:'Создано VALÉRIO',
+    locationTitle:'Погода рядом с вами', locate:'Определить моё местоположение', locating:'Определяем местоположение…', refreshLocation:'Обновить', feelsLike:'Ощущается как', humidity:'Влажность', wind:'Ветер', locationPermission:'Разрешите доступ к геолокации в браузере.', locationUnavailable:'Геолокация недоступна на этом устройстве.', locationFailed:'Не удалось определить местоположение. Проверьте разрешение браузера.'
   },
   en: {
     nav:['Overview','Explore','Real estate','Travel','Business & invest','Transport','Weather','AI concierge'],
@@ -45,7 +46,8 @@ const copy = {
     all:'All', nature:'Nature', city:'Cities', coast:'Coast',
     askPlaceholder:'Ask about Madeira…', send:'Send',
     preview:'Data sources', previewText:'Official Madeira sources and IPMA weather data are wired into the server. The OpenAI server key must be configured to activate the AI concierge.',
-    author:'Created by VALÉRIO'
+    author:'Created by VALÉRIO',
+    locationTitle:'Weather near you', locate:'Use my location', locating:'Finding your location…', refreshLocation:'Refresh', feelsLike:'Feels like', humidity:'Humidity', wind:'Wind', locationPermission:'Allow location access in your browser.', locationUnavailable:'Geolocation is unavailable on this device.', locationFailed:'Could not determine your location. Check browser permission.'
   },
   pt: {
     nav:['Visão geral','Explorar','Imobiliário','Viagens','Negócios e investimento','Transportes','Tempo','Assistente IA'],
@@ -64,7 +66,8 @@ const copy = {
     all:'Todos', nature:'Natureza', city:'Cidades', coast:'Costa',
     askPlaceholder:'Pergunte sobre a Madeira…', send:'Enviar',
     preview:'Fontes de dados', previewText:'As fontes oficiais da Madeira e os dados meteorológicos do IPMA já estão ligados no servidor. É necessário configurar a chave OpenAI no servidor para ativar o assistente IA.',
-    author:'Criado por VALÉRIO'
+    author:'Criado por VALÉRIO',
+    locationTitle:'Meteorologia perto de si', locate:'Usar a minha localização', locating:'A determinar localização…', refreshLocation:'Atualizar', feelsLike:'Sensação térmica', humidity:'Humidade', wind:'Vento', locationPermission:'Permita o acesso à localização no navegador.', locationUnavailable:'A geolocalização não está disponível neste dispositivo.', locationFailed:'Não foi possível determinar a localização. Verifique a permissão do navegador.'
   }
 };
 
@@ -108,6 +111,9 @@ function App(){
   const [assistantBusy,setAssistantBusy]=useState(false);
   const [weatherData,setWeatherData]=useState(null);
   const [weatherError,setWeatherError]=useState('');
+  const [locationWeather,setLocationWeather]=useState(null);
+  const [locationBusy,setLocationBusy]=useState(false);
+  const [locationError,setLocationError]=useState('');
   const [sources,setSources]=useState([]);
   const [chat,setChat]=useState([]);
   const [message,setMessage]=useState('');
@@ -166,6 +172,29 @@ function App(){
 
   const signOut=async()=>{if(supabase)await supabase.auth.signOut();setUser(null);};
 
+  const detectLocation=()=>{
+    if(!navigator.geolocation){setLocationError(t.locationUnavailable);return;}
+    setLocationBusy(true);setLocationError('');
+    navigator.geolocation.getCurrentPosition(async({coords})=>{
+      try{
+        const params=new URLSearchParams({lat:String(coords.latitude),lon:String(coords.longitude)});
+        const response=await fetch('/api/location-weather?'+params.toString());
+        const data=await response.json();
+        if(!response.ok)throw new Error(data.error||'Location weather unavailable');
+        setLocationWeather(data);
+      }catch(error){setLocationError(error.message||t.locationFailed);}
+      finally{setLocationBusy(false);}
+    },(error)=>{
+      setLocationError(error.code===1?t.locationPermission:t.locationFailed);
+      setLocationBusy(false);
+    },{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
+  };
+
+  const weatherDescription=(code)=>{
+    const labels={0:['Ясно','Clear','Céu limpo'],1:['Преимущественно ясно','Mainly clear','Predominantemente limpo'],2:['Переменная облачность','Partly cloudy','Parcialmente nublado'],3:['Пасмурно','Overcast','Encoberto'],45:['Туман','Fog','Nevoeiro'],48:['Изморозь и туман','Rime fog','Nevoeiro gelado'],51:['Лёгкая морось','Light drizzle','Chuvisco fraco'],53:['Морось','Drizzle','Chuvisco'],55:['Сильная морось','Dense drizzle','Chuvisco intenso'],61:['Небольшой дождь','Light rain','Chuva fraca'],63:['Дождь','Rain','Chuva'],65:['Сильный дождь','Heavy rain','Chuva forte'],71:['Небольшой снег','Light snow','Neve fraca'],73:['Снег','Snow','Neve'],75:['Сильный снег','Heavy snow','Neve forte'],80:['Кратковременный дождь','Rain showers','Aguaceiros'],81:['Ливни','Rain showers','Aguaceiros'],82:['Сильные ливни','Heavy showers','Aguaceiros fortes'],95:['Гроза','Thunderstorm','Trovoada'],96:['Гроза с градом','Thunderstorm with hail','Trovoada com granizo'],99:['Сильная гроза с градом','Severe thunderstorm','Trovoada forte']};
+    return labels[code]?.[['ru','en','pt'].indexOf(lang)]|| (lang==='en'?'Weather conditions':lang==='pt'?'Condições meteorológicas':'Погодные условия');
+  };
+
   const sendChat=async(e)=>{
     e.preventDefault();if(!message.trim()||assistantBusy)return;
     const q=message.trim();
@@ -218,6 +247,13 @@ function App(){
           <div className="hero">
             <div className="hero-copy"><div className="eyebrow"><span/> {t.eyebrow}</div><h1>{t.headline.split('\n').map((s,i)=><React.Fragment key={s}>{i>0&&<br/>}{s}</React.Fragment>)}</h1><p>{t.intro}</p><div className="hero-actions"><button className="primary" onClick={()=>openSection('explore')}>{t.explore}<ArrowUpRight size={16}/></button><button className="ghost" onClick={()=>openSection('concierge')}><Sparkles size={16}/>{t.ask}</button></div><div className="hero-foot"><span className="avatar-stack"><i>✦</i><i>⌂</i><i>↗</i></span>{t.forAll}</div></div>
             <div className="hero-visual"><div className="sun-glow"/><div className="hero-orbit orbit-one"/><div className="hero-orbit orbit-two"/><div className="hero-island"><Mountain size={88} strokeWidth={1}/><Waves size={50} strokeWidth={1}/></div><div className="floating-chip chip-top"><MapPin size={14}/> 32° 45′ N · 16° 57′ W</div><div className="floating-chip chip-bottom"><Sun size={15}/> Atlantic · Madeira</div><div className="hero-caption">ATLANTIC<br/><b>MADEIRA</b></div></div>
+          </div>
+          <div className="location-weather-card">
+            <div className="location-weather-heading"><div><span className="eyebrow">LIVE · LOCAL WEATHER</span><h2>{t.locationTitle}</h2></div><div className="location-weather-icon"><CloudSun size={27}/></div></div>
+            {locationWeather? <div className="location-weather-data"><div className="location-temperature"><strong>{Math.round(locationWeather.current.temperatureC)}°</strong><span>{weatherDescription(locationWeather.current.weatherCode)}</span><small>{locationWeather.location.name}{locationWeather.location.country?', '+locationWeather.location.country:''}</small></div><div className="location-weather-details"><span>{t.feelsLike} <b>{Math.round(locationWeather.current.feelsLikeC)}°C</b></span><span>{t.humidity} <b>{locationWeather.current.humidity}%</b></span><span>{t.wind} <b>{Math.round(locationWeather.current.windKmh)} km/h</b></span></div></div>:<p className="location-weather-hint">{t.locationTitle}. Нажмите кнопку, чтобы показать погоду и город по GPS.</p>}
+            {locationError&&<p className="location-weather-error" role="status">{locationError}</p>}
+            <button className="location-detect-button" onClick={detectLocation} disabled={locationBusy}><Navigation size={15}/>{locationBusy?t.locating:locationWeather?t.refreshLocation:t.locate}</button>
+            {locationWeather&&<small className="location-weather-updated">Open-Meteo · {new Date(locationWeather.fetchedAt).toLocaleTimeString()}</small>}
           </div>
           <div className="section-heading"><div><span className="eyebrow">{t.discover}</span><h2>{t.quick}</h2></div><span className="subtle-tag">01 / 08</span></div>
           <div className="feature-grid">
