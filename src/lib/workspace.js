@@ -32,28 +32,25 @@ function requireClient() {
 
 export async function loadWorkspace(userId) {
   requireClient();
-  let { data: projects, error } = await supabase
-    .from('projects').select('*').eq('user_id', userId).order('created_at', { ascending: true });
-  if (error) throw error;
+  const { error: profileError } = await supabase.from('workspace_profiles')
+    .upsert({ user_id: userId }, { onConflict: 'user_id', ignoreDuplicates: true });
+  if (profileError) throw profileError;
 
-  // Preserve the existing VALÉRIO roadmap as a one-time starter workspace for a new account.
-  if (projects.length === 0) {
+  const { data: profile, error: profileReadError } = await supabase
+    .from('workspace_profiles').select('starter_seeded').eq('user_id', userId).single();
+  if (profileReadError) throw profileReadError;
+
+  if (!profile.starter_seeded) {
     const { error: seedError } = await supabase.from('projects').upsert(
       starterProjects.map((project) => ({ ...project, user_id: userId })),
       { onConflict: 'user_id,name', ignoreDuplicates: true },
     );
     if (seedError) throw seedError;
-    const refreshed = await supabase.from('projects').select('*').eq('user_id', userId).order('created_at', { ascending: true });
-    if (refreshed.error) throw refreshed.error;
-    projects = refreshed.data;
-  }
 
-  let { data: tasks, error: taskError } = await supabase
-    .from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: true });
-  if (taskError) throw taskError;
-
-  if (tasks.length === 0 && projects.length > 0) {
-    const projectIds = new Map(projects.map((project) => [project.name, project.id]));
+    const { data: seedProjects, error: seedProjectsError } = await supabase
+      .from('projects').select('id,name').eq('user_id', userId);
+    if (seedProjectsError) throw seedProjectsError;
+    const projectIds = new Map(seedProjects.map((project) => [project.name, project.id]));
     const seedTasks = starterTasks
       .filter((task) => projectIds.has(task.projectName))
       .map(({ projectName, ...task }) => ({
@@ -66,12 +63,19 @@ export async function loadWorkspace(userId) {
       ignoreDuplicates: true,
     });
     if (seedTaskError) throw seedTaskError;
-    const refreshed = await supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: true });
-    if (refreshed.error) throw refreshed.error;
-    tasks = refreshed.data;
+
+    const { error: markSeededError } = await supabase.from('workspace_profiles')
+      .update({ starter_seeded: true }).eq('user_id', userId);
+    if (markSeededError) throw markSeededError;
   }
 
-  return { projects, tasks };
+  const [projectsResult, tasksResult] = await Promise.all([
+    supabase.from('projects').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+    supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+  ]);
+  if (projectsResult.error) throw projectsResult.error;
+  if (tasksResult.error) throw tasksResult.error;
+  return { projects: projectsResult.data, tasks: tasksResult.data };
 }
 
 export async function createProject(userId, values) {
