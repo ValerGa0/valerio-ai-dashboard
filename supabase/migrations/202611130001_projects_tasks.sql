@@ -1,6 +1,12 @@
 -- VALÉRIO AI Dashboard: cloud workspace foundation
 -- Apply with: supabase db push (or paste into the Supabase SQL Editor).
 
+create table if not exists public.workspace_profiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  starter_seeded boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.projects (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -60,8 +66,15 @@ create trigger tasks_set_updated_at
 before update on public.tasks
 for each row execute function public.set_updated_at();
 
+alter table public.workspace_profiles enable row level security;
 alter table public.projects enable row level security;
 alter table public.tasks enable row level security;
+
+drop policy if exists "Users manage their own workspace profile" on public.workspace_profiles;
+create policy "Users manage their own workspace profile"
+on public.workspace_profiles for all
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
 
 drop policy if exists "Users manage their own projects" on public.projects;
 create policy "Users manage their own projects"
@@ -75,5 +88,6 @@ on public.tasks for all
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
 
+grant select, insert, update, delete on public.workspace_profiles to authenticated;
 grant select, insert, update, delete on public.projects to authenticated;
 grant select, insert, update, delete on public.tasks to authenticated;
