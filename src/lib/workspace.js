@@ -59,7 +59,7 @@ export async function loadWorkspace(userId) {
         project_id: projectIds.get(projectName),
       }));
     const { error: seedTaskError } = await supabase.from('tasks').upsert(seedTasks, {
-      onConflict: 'user_id,title',
+      onConflict: 'user_id,project_id,title',
       ignoreDuplicates: true,
     });
     if (seedTaskError) throw seedTaskError;
