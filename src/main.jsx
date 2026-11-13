@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   Activity, ArrowRight, ArrowUpRight, BarChart3, Bell, Bot, CalendarDays,
@@ -7,6 +7,7 @@ import {
   Send, Settings, Sparkles, Users, Wand2, Zap, Menu, X
 } from 'lucide-react';
 import './styles.css';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 const initialAgents = [
   { id: 'design', name: 'Design Agent', role: 'Creativity & Design', icon: '✦', color: 'gold', status: 'Online', task: 'VALÉRIO Brand System' },
@@ -48,6 +49,11 @@ const nav = [
 ];
 
 function App() {
+  const [session, setSession] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authMessage, setAuthMessage] = useState('');
+  const [authBusy, setAuthBusy] = useState(false);
   const [page, setPage] = useState('Dashboard');
   const [agents] = useState(initialAgents);
   const [projects, setProjects] = useState(initialProjects);
@@ -66,15 +72,62 @@ function App() {
   const notify = (message) => { setToast(message); window.clearTimeout(notify.timer); notify.timer = window.setTimeout(() => setToast(''), 2400); };
   const openProject = (project) => { setSelectedProject(project); setPage('Project details'); };
   const openAgent = (agent) => { setSelectedAgent(agent); setPage('Agent workspace'); };
-  const addTask = (event) => {
+
+  useEffect(() => {
+    if (!supabase) { setAuthReady(true); return; }
+    let active = true;
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!active) return;
+      if (error) setAuthMessage(error.message);
+      setSession(data?.session || null); setAuthReady(true);
+    }).catch((error) => { if (active) { setAuthMessage(error.message || 'Не удалось проверить сессию.'); setAuthReady(true); } });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => { if (active) setSession(nextSession); });
+    return () => { active = false; subscription.unsubscribe(); };
+  }, []);
+
+  useEffect(() => {
+    if (!session?.user?.id || !supabase) return;
+    let active = true;
+    const loadWorkspace = async () => {
+      const { data: projectRows, error: projectError } = await supabase.from('valerio_projects').select('*').order('created_at', { ascending: true });
+      if (projectError) { notify('Ошибка загрузки проектов: ' + projectError.message); return; }
+      let savedProjects = projectRows || [];
+      if (savedProjects.length === 0) {
+        const seedProjects = initialProjects.map((p) => ({ user_id: session.user.id, name: p.name, description: p.description, category: p.type, assigned_agent: p.agent, status: p.status === 'In progress' ? 'in_progress' : 'planning', progress: p.progress }));
+        const { data, error } = await supabase.from('valerio_projects').insert(seedProjects).select('*');
+        if (error) { notify('Не удалось создать стартовые проекты: ' + error.message); return; }
+        savedProjects = data || [];
+      }
+      const { data: taskRows, error: taskError } = await supabase.from('valerio_tasks').select('*').order('created_at', { ascending: false });
+      if (taskError) { notify('Ошибка загрузки задач: ' + taskError.message); return; }
+      let savedTasks = taskRows || [];
+      if (savedTasks.length === 0) {
+        const idsByName = new Map(savedProjects.map((p) => [p.name, p.id]));
+        const seedTasks = initialTasks.map((t) => ({ user_id: session.user.id, project_id: idsByName.get(t.project) || null, title: t.title, assigned_agent: t.agent, priority: t.priority.toLowerCase(), status: t.done ? 'done' : 'todo' }));
+        const { data, error } = await supabase.from('valerio_tasks').insert(seedTasks).select('*');
+        if (error) { notify('Не удалось создать стартовые задачи: ' + error.message); return; }
+        savedTasks = data || [];
+      }
+      if (!active) return;
+      const names = new Map(savedProjects.map((p) => [p.id, p.name]));
+      const mappedProjects = savedProjects.map((p) => ({ id: p.id, name: p.name, type: p.category, progress: p.progress, agent: p.assigned_agent, status: p.status === 'in_progress' ? 'In progress' : p.status, tasks: savedTasks.filter((t) => t.project_id === p.id).length, description: p.description }));
+      setProjects(mappedProjects); setSelectedProject(mappedProjects[0] || null);
+      setTasks(savedTasks.map((t) => ({ id: t.id, title: t.title, project: names.get(t.project_id) || 'Без проекта', agent: t.assigned_agent, due: t.due_date || 'Не назначено', priority: t.priority.charAt(0).toUpperCase() + t.priority.slice(1), done: t.status === 'done' })));
+    };
+    loadWorkspace();
+    return () => { active = false; };
+  }, [session?.user?.id]);
+
+  const addTask = async (event) => {
     event.preventDefault();
-    if (!taskTitle.trim()) return;
-    const task = { id: Date.now(), title: taskTitle.trim(), project: selectedProject.name, agent: 'Manager', due: 'Not scheduled', priority: 'Medium', done: false };
+    if (!taskTitle.trim() || !selectedProject || !supabase || !session?.user?.id) return;
+    const { data, error } = await supabase.from('valerio_tasks').insert({ user_id: session.user.id, project_id: selectedProject.id, title: taskTitle.trim(), assigned_agent: 'Manager', priority: 'medium', status: 'todo' }).select('*').single();
+    if (error) { notify('Не удалось сохранить задачу: ' + error.message); return; }
+    const task = { id: data.id, title: data.title, project: selectedProject.name, agent: data.assigned_agent, due: 'Не назначено', priority: 'Medium', done: false };
     setTasks((current) => [task, ...current]);
-    setTaskTitle('');
-    setShowTaskForm(false);
-    setPage('Tasks');
-    notify('Задача добавлена в текущую сессию');
+    setProjects((current) => current.map((p) => p.id === selectedProject.id ? { ...p, tasks: p.tasks + 1 } : p));
+    setSelectedProject((current) => current ? { ...current, tasks: current.tasks + 1 } : current);
+    setTaskTitle(''); setShowTaskForm(false); setPage('Tasks'); notify('Задача сохранена в облаке');
   };
   const sendChat = () => {
     if (!chatInput.trim()) return;
@@ -86,16 +139,36 @@ function App() {
   const filteredProjects = useMemo(() => projects.filter((project) => (project.name + ' ' + project.type).toLowerCase().includes(query.toLowerCase())), [projects, query]);
   const completed = tasks.filter((task) => task.done).length;
 
-  const toggleTask = (id) => setTasks((current) => current.map((task) => task.id === id ? { ...task, done: !task.done } : task));
+  const toggleTask = async (id) => {
+    const task = tasks.find((item) => item.id === id);
+    if (!task || !supabase) return;
+    const done = !task.done;
+    const { error } = await supabase.from('valerio_tasks').update({ status: done ? 'done' : 'todo', updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) { notify('Не удалось обновить задачу: ' + error.message); return; }
+    setTasks((current) => current.map((item) => item.id === id ? { ...item, done } : item));
+    notify(done ? 'Задача завершена' : 'Задача возвращена в работу');
+  };
   const quick = (action) => {
     if (action === 'New task') { setShowTaskForm(true); return; }
     if (action === 'New project') {
-      const project = { id: 'project-' + Date.now(), name: 'New VALÉRIO project', type: 'New project', progress: 0, agent: 'Manager', status: 'Planning', tasks: 0, description: 'New project space. Add a clear outcome and first milestone.' };
-      setProjects((current) => [project, ...current]); setSelectedProject(project); setPage('Project details'); notify('Проект создан в текущей сессии'); return;
+      if (!supabase || !session?.user?.id) { notify('Сначала войдите в аккаунт'); return; }
+      supabase.from('valerio_projects').insert({ user_id: session.user.id, name: 'Новый проект VALÉRIO', category: 'Новый проект', assigned_agent: 'Manager', status: 'planning', progress: 0, description: 'Опишите результат проекта и первый этап.' }).select('*').single().then(({ data, error }) => {
+        if (error) { notify('Не удалось создать проект: ' + error.message); return; }
+        const project = { id: data.id, name: data.name, type: data.category, progress: data.progress, agent: data.assigned_agent, status: 'Planning', tasks: 0, description: data.description };
+        setProjects((current) => [project, ...current]); setSelectedProject(project); setPage('Project details'); notify('Проект сохранён в Supabase');
+      }); return;
     }
     if (action === 'AI Assistant') { setPage('AI Manager'); return; }
     notify(action + ' — функция будет подключена на следующем этапе');
   };
+
+  if (!authReady) return <AuthScreen title="VALÉRIO OS" message="Проверяем защищённую сессию..." />;
+  if (!isSupabaseConfigured) return <AuthScreen title="Подключение облака" message="Не заданы VITE_SUPABASE_URL и VITE_SUPABASE_PUBLISHABLE_KEY. Добавьте их в настройки окружения Vercel." setup />;
+  if (!session) return <AuthScreen title="Добро пожаловать в VALÉRIO" message={authMessage || 'Войдите по безопасной ссылке, которую мы отправим на вашу почту.'} email={authEmail} setEmail={setAuthEmail} busy={authBusy} onSubmit={async (event) => {
+    event.preventDefault(); setAuthBusy(true); setAuthMessage('');
+    const { error } = await supabase.auth.signInWithOtp({ email: authEmail.trim(), options: { emailRedirectTo: window.location.origin } });
+    setAuthBusy(false); setAuthMessage(error ? error.message : 'Ссылка для входа отправлена. Проверьте почту.');
+  }} />;
 
   return <div className="app-shell">
     <aside className={'sidebar ' + (mobileNav ? 'sidebar-open' : '')}>
@@ -114,7 +187,7 @@ function App() {
       <header className="topbar">
         <button className="mobile-menu" onClick={() => setMobileNav(true)}><Menu size={19}/></button>
         <label className="global-search"><Search size={16}/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Поиск по проектам, задачам, файлам, агентам..."/><kbd>⌘ K</kbd></label>
-        <div className="top-actions"><button className="top-icon" onClick={() => notify('Новых уведомлений нет')}><Bell size={18}/><i/></button><button className="top-icon" onClick={() => setPage('Settings')}><Settings size={18}/></button><div className="user-chip"><div className="user-avatar">V</div><span><b>ValerGa</b><small>AI Manager</small></span><ChevronDown size={14}/></div></div>
+        <div className="top-actions"><button className="top-icon" onClick={() => notify('Новых уведомлений нет')}><Bell size={18}/><i/></button><button className="top-icon" onClick={() => setPage('Settings')}><Settings size={18}/></button><button className="user-chip" onClick={() => supabase.auth.signOut()} title="Выйти"><div className="user-avatar">V</div><span><b>{session.user.email || 'ValerGa'}</b><small>Выйти из аккаунта</small></span><ChevronDown size={14}/></button></div>
       </header>
 
       <div className="page-content">
@@ -162,6 +235,7 @@ function App() {
   </div>;
 }
 
+function AuthScreen({ title, message, email, setEmail, busy, onSubmit, setup }) { return <div className="auth-screen"><div className="auth-card"><div className="brand-mark auth-mark">V</div><span className="eyebrow">VALÉRIO AI · COMMAND CENTER</span><h1>{title}</h1><p>{message}</p>{!setup && <form onSubmit={onSubmit}><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Ваш email" required/><button className="gold-button" disabled={busy}>{busy ? 'Отправляем...' : 'Получить ссылку для входа'}</button></form>}</div></div>; }
 function Metric({ icon: Icon, label, value, trend }) { return <div className="metric-card"><div className="metric-top"><Icon size={17}/><span>{label}</span></div><b className="metric-value">{value}</b>{trend && <small>{trend}</small>}</div>; }
 function SectionTitle({ title, action, onAction }) { return <div className="section-title"><h2>{title}</h2>{action && <button onClick={onAction}>{action}<ArrowUpRight size={13}/></button>}</div>; }
 function ProjectRow({ project, onClick }) { return <button className="project-row" onClick={onClick}><span className="project-thumb">{project.name.startsWith('VALÉRIO') ? 'V' : '◈'}</span><span className="project-info"><b>{project.name}</b><small>{project.type}</small></span><span className="project-progress"><i><b style={{width: project.progress + '%'}}/></i><small>{project.progress}%</small></span><span className="status-pill">{project.status}</span><ChevronRight size={15}/></button>; }
