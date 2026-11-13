@@ -14,3 +14,26 @@ VALÉRIO OS is a unified ecosystem for building the VALÉRIO direction as one pr
 ## Product idea
 
 The main idea is to connect brand, dashboard, agents, projects, and products into one luxury-tech ecosystem: **VALÉRIO OS**.
+
+## VALÉRIO AI Dashboard development
+
+The approved desktop direction is the premium graphite / gold VALÉRIO Command Center.
+
+### Run locally
+
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local`.
+Only the Supabase publishable key belongs in the browser. Never expose a service-role or secret key.
+
+### Cloud data foundation
+
+The Supabase project has dedicated `public.valerio_projects` and `public.valerio_tasks` tables. Both have row-level security enabled and owner-scoped policies for authenticated users. The frontend client is in `src/lib/supabase.js`.
+
+### Current build scope
+
+The dashboard UI includes responsive navigation, six specialist agent workspaces, project cards, task lists, activity, calendar, analytics, quick actions, and an AI Manager conversation surface. Live AI generation and complete authenticated CRUD wiring are follow-up implementation slices.
