@@ -1,0 +1,53 @@
+name: Publish MADEIRA AI container images
+
+on:
+  push:
+    branches:
+      - feature/madeira-ai-container-images
+    paths:
+      - "madeira-ai/containers/**"
+      - ".github/workflows/publish-madeira-containers.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: madeira-ai-vcr-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+
+      - name: Install pinned Vercel CLI
+        run: npm install --global vercel@65.15.0
+
+      - name: Authenticate Docker with Vercel Container Registry
+        run: vercel vcr login docker --scope valerga0s-projects
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build and publish Node.js runtime
+        run: >-
+          vercel vcr build docker madeira-ai/containers/node-runtime
+          madeira-ai-node-runtime:latest
+          --project prj_TT7NxOR6MZrYQieAkOHZIIJec87a
+          --push
+
+      - name: Build and publish Python worker
+        run: >-
+          vercel vcr build docker madeira-ai/containers/python-worker
+          madeira-ai-python-worker:latest
+          --project prj_TT7NxOR6MZrYQieAkOHZIIJec87a
+          --push
