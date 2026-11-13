@@ -28,7 +28,7 @@ const businesses = [
 {id:"north77",name:"Mini Market North 77",category:"retail",parish:"Porto Moniz",address:"ER101 71A, 9270-095 Porto Moniz",phone:"",source:"online",url:"https://www.google.com/maps/search/?api=1&query=Mini+Market+North+77+Porto+Moniz"},
 {id:"pharmacy",name:"Farmácia Porto Moniz",category:"services",parish:"Porto Moniz",address:"Porto Moniz",phone:"+351291853285",source:"directory",url:"https://www.google.com/maps/search/?api=1&query=Farmacia+Porto+Moniz"},
 {id:"carpentry",name:"Catanho & Morgado — Carpintaria e Marcenaria",category:"services",parish:"Porto Moniz",address:"Santa / Parque Empresarial do Porto Moniz",phone:"+351291853302",source:"directory",url:"https://www.google.com/maps/search/?api=1&query=Catanho+Morgado+Porto+Moniz"},
-{id:"property-sources",name:"PDM, urbanismo e terrenos — fontes oficiais",category:"property",parish:"Todo o concelho",address:"Quatro freguesias",phone:"",source:"official",url:"https://www.portomoniz.pt/pt/atividade-municipal/economia/urbanismo"},
+{id:"property-sources",name:"PDM, urbanismo e terrenos — fontes oficiais",category:"property",parish:"Todo o concelho",address:"Quatro freguesias",phone:"",source:"official",url:"https://www.portomoniz.pt/pt/atividade-municipal/urbanismo/plano-diretor-municipal"},
 {id:"company-register",name:"Diretório municipal de empresas",category:"services",parish:"Todo o concelho",address:"Quatro freguesias",phone:"",source:"official",url:"https://www.portomoniz.pt/pt/atividade-municipal/economia/diretorio-de-empresas"}
 ];
 export default function handler(req,res){
