@@ -1,3 +1,4 @@
+# MADEIRA AI Node runtime image; published to Vercel Container Registry.
 FROM node:24-alpine
 
 RUN apk add --no-cache ca-certificates curl tini \
