@@ -182,7 +182,11 @@ function App(){
   const [locationWeather,setLocationWeather]=useState(null);
   const [locationBusy,setLocationBusy]=useState(false);
   const [locationError,setLocationError]=useState('');
-  const [sources,setSources]=useState([]);\n  const [businessesData,setBusinessesData]=useState([]);\n  const [businessCategory,setBusinessCategory]=useState('all');\n  const [businessParish,setBusinessParish]=useState('all');\n  const [businessQuery,setBusinessQuery]=useState('');\n  const [businessesData,setBusinessesData]=useState([]);\n  const [businessCategory,setBusinessCategory]=useState('all');\n  const [businessParish,setBusinessParish]=useState('all');\n  const [businessQuery,setBusinessQuery]=useState('');
+  const [sources,setSources]=useState([]);
+  const [businessesData,setBusinessesData]=useState([]);
+  const [businessCategory,setBusinessCategory]=useState('all');
+  const [businessParish,setBusinessParish]=useState('all');
+  const [businessQuery,setBusinessQuery]=useState('');
   const [chat,setChat]=useState([]);
   const [message,setMessage]=useState('');
   const [mobileOpen,setMobileOpen]=useState(false);
@@ -198,6 +202,10 @@ function App(){
   useEffect(()=>{
     localStorage.setItem('madeira-saved',JSON.stringify(saved));
   },[saved]);
+
+  useEffect(()=>{
+    fetch('/api/porto-moniz').then(r=>r.ok?r.json():Promise.reject()).then(data=>setBusinessesData(data.businesses||[])).catch(()=>setBusinessesData([]));
+  },[]);
 
   useEffect(()=>{
     fetch('/api/sources').then(r=>r.ok?r.json():Promise.reject()).then(data=>setSources(data.sources||[])).catch(()=>setSources([]));
