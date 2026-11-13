@@ -64,13 +64,4 @@
 @media(max-width:560px){.dashboard-welcome{grid-template-columns:1fr;min-height:0}.dashboard-welcome-copy{padding:27px 20px 12px}.dashboard-welcome-copy h1{font-size:38px}.dashboard-coast-art{min-height:145px}.coast-cliff{height:95%;width:80%}.location-weather-card{padding:17px}.location-temperature strong{font-size:49px}.dashboard-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.dashboard-shortcuts button{min-height:90px;padding:13px}.dashboard-shortcuts button span{font-size:11px}}
 
 
-.partner-travel-card{display:grid;grid-template-columns:.85fr 1.15fr;gap:24px;margin-top:20px;padding:24px;border:1px solid #52644f;border-radius:17px;background:linear-gradient(120deg,#172e2b,#10262b 62%,#183d43);box-shadow:0 15px 35px #0002}
-.partner-travel-brand{display:flex;align-items:flex-start;gap:14px}
-.partner-mark{width:48px;height:48px;flex:0 0 48px;display:grid;place-items:center;border:1px solid #b99d64;border-radius:14px;color:#dfc58f;background:#d9c18c12}
-.partner-travel-brand .eyebrow{color:#d9c18c;font-size:9px;letter-spacing:.17em}
-.partner-travel-brand h2{margin:7px 0;font:700 22px Manrope;color:#f0eee4}
-.partner-travel-brand p,.partner-travel-content>p{margin:0;color:#aebfb5;font-size:12px;line-height:1.7}
-.partner-travel-content{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
-.partner-travel-link{display:inline-flex;align-items:center;gap:9px;text-decoration:none}
-.partner-travel-content small{max-width:620px;color:#879b91;font-size:10px;line-height:1.65}
-@media(max-width:650px){.partner-travel-card{grid-template-columns:1fr;gap:17px;padding:18px}.partner-travel-brand h2{font-size:19px}}
+
