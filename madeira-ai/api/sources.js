@@ -10,5 +10,6 @@ const sources = [
 ];
 export default function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
-  return res.status(200).setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=7200").json({ generatedAt: new Date().toISOString(), sources });
+  res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=7200");
+  return res.status(200).json({ generatedAt: new Date().toISOString(), sources });
 }
