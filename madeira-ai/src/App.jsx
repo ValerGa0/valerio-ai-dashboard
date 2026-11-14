@@ -203,6 +203,15 @@ function App(){
   const [metaConstructionIndicators,setMetaConstructionIndicators]=useState([]);
   const [metaLoading,setMetaLoading]=useState(false);
   const [metaError,setMetaError]=useState('');
+  const [needRespondentType,setNeedRespondentType]=useState('resident');
+  const [needMunicipality,setNeedMunicipality]=useState('');
+  const [needCategory,setNeedCategory]=useState('housing');
+  const [needTitle,setNeedTitle]=useState('');
+  const [needDescription,setNeedDescription]=useState('');
+  const [needConsent,setNeedConsent]=useState(false);
+  const [needSubmitBusy,setNeedSubmitBusy]=useState(false);
+  const [needSubmitMessage,setNeedSubmitMessage]=useState('');
+  const [needSubmitError,setNeedSubmitError]=useState('');
   const [metaRegion,setMetaRegion]=useState('all');
   const [businessCategory,setBusinessCategory]=useState('all');
   const [businessParish,setBusinessParish]=useState('all');
@@ -321,6 +330,24 @@ function App(){
   };
 
 
+
+  const submitNeed=async(e)=>{
+    e.preventDefault();setNeedSubmitMessage('');setNeedSubmitError('');
+    if(!supabase){setNeedSubmitError('Облачная база сейчас не подключена.');return;}
+    if(!user){setNeedSubmitError('Войдите в аккаунт, чтобы отправить сообщение.');setAuthOpen(true);return;}
+    if(!needConsent){setNeedSubmitError('Подтвердите согласие на обезличенный анализ.');return;}
+    setNeedSubmitBusy(true);
+    try{
+      const {error}=await supabase.from('island_need_submissions').insert({
+        submitted_by:user.id,respondent_type:needRespondentType,municipality_id:needMunicipality||null,
+        category:needCategory,title:needTitle.trim(),description:needDescription.trim(),consent_to_aggregate:true
+      });
+      if(error)throw error;
+      setNeedSubmitMessage('Спасибо. Сообщение отправлено на закрытую модерацию; в общую базу попадут только проверенные обезличенные выводы.');
+      setNeedTitle('');setNeedDescription('');setNeedConsent(false);
+    }catch(error){setNeedSubmitError(error.message||'Не удалось отправить сообщение. Попробуйте позже.');}
+    finally{setNeedSubmitBusy(false);}
+  };
 
   const signOut=async()=>{if(supabase)await supabase.auth.signOut();setUser(null);};
 
@@ -446,6 +473,25 @@ function App(){
           {metaDirectory.filter(x=>metaRegion==='all'||x.municipality_id===metaRegion).length===0?<div className="meta-empty"><Globe2 size={26}/><b>{lang==='ru'?'Каталог готов к наполнению':lang==='pt'?'Catálogo pronto a ser preenchido':'Directory ready for verified records'}</b><p>{lang==='ru'?'Для выбранного муниципалитета пока нет записей в общей базе. Отсутствие записи не означает, что организации или услуги не существует.':lang==='pt'?'A estrutura central já existe. Ainda não há registos de organizações carregados; cada entrada será adicionada com fonte, data de verificação e estado de confiança.':'The central structure is in place. No organization records have been imported yet; each entry will carry its source, verification date and confidence status.'}</p></div>:<div className="meta-directory-grid">{metaDirectory.filter(x=>metaRegion==='all'||x.municipality_id===metaRegion).map(entry=><article key={entry.id} className="meta-directory-card"><span>{entry.category}</span><b>{entry.name}</b><p>{entry.description||entry.address||''}</p><small>{entry.verification_status.replace('_',' ')}{entry.last_verified_at?' · '+new Date(entry.last_verified_at).toLocaleDateString():''}</small>{(entry.source_url||entry.website)&&<a href={entry.source_url||entry.website} target="_blank" rel="noreferrer">{lang==='ru'?'Открыть источник':'Open source'} ↗</a>}</article>)}</div>}
           <div className="meta-two-columns"><section><div className="meta-section-heading"><div><span className="eyebrow">03 · NEEDS MAP</span><h2>{lang==='ru'?'Чего не хватает':lang==='pt'?'O que faz falta':'What is missing'}</h2></div><span className="meta-count">{metaNeeds.length}</span></div>{metaNeeds.length?metaNeeds.filter(x=>metaRegion==='all'||x.municipality_id===metaRegion).map(item=><article className="meta-signal-card" key={item.id}><b>{item.title}</b><p>{item.description}</p><small>{item.category} · {item.validation_status}</small></article>):<div className="meta-empty compact"><p>{lang==='ru'?'Потребности пока не объявляются фактами. Они будут добавляться после проверки статистики, муниципальных документов и свидетельств жителей.':'Needs are not presented as facts without evidence. They will be added after checking statistics, municipal documents and resident feedback.'}</p></div>}</section>
             <section><div className="meta-section-heading"><div><span className="eyebrow">04 · OPPORTUNITY RADAR</span><h2>{lang==='ru'?'Что можно создать':lang==='pt'?'O que pode ser criado':'What could be built'}</h2></div><span className="meta-count">{metaOpportunities.length}</span></div>{metaOpportunities.length?metaOpportunities.filter(x=>metaRegion==='all'||x.municipality_id===metaRegion).map(item=><article className="meta-signal-card opportunity" key={item.id}><b>{item.title}</b><p>{item.description}</p><small>{item.category} · {item.status}</small></article>):<div className="meta-empty compact"><p>{lang==='ru'?'Идеи для бизнеса и инвестиций будут связаны с конкретной потребностью и подтверждающими источниками.':'Business and investment ideas will be linked to a concrete need and supporting evidence.'}</p></div>}</section></div>
+          <section className="need-submission-panel">
+            <div className="meta-section-heading"><div><span className="eyebrow">COMMUNITY SIGNALS · MODERATED</span><h2>{lang==='ru'?'Сообщить о реальной потребности':lang==='pt'?'Partilhar uma necessidade real':'Share a real community need'}</h2></div></div>
+            <p>{lang==='ru'?'Расскажите, какой услуги, решения или инфраструктуры не хватает жителям или гостям архипелага. Каждое сообщение проходит закрытую проверку.':lang==='pt'?'Partilhe que serviço, solução ou infraestrutura faz falta aos residentes ou visitantes. Cada contribuição passa por revisão privada.':'Tell us which service, solution or infrastructure residents or visitors need. Every submission is privately reviewed.'}</p>
+            {!user&&<div className="need-signin-note"><span>{lang==='ru'?'Для отправки потребуется аккаунт MADEIRA AI.':lang==='pt'?'É necessária uma conta MADEIRA AI para enviar.':'A MADEIRA AI account is required to submit.'}</span><button type="button" onClick={()=>setAuthOpen(true)}>{lang==='ru'?'Войти':'Sign in'} <ArrowUpRight size={14}/></button></div>}
+            <form className="need-submission-form" onSubmit={submitNeed}>
+              <div className="need-form-grid">
+                <label>{lang==='ru'?'Кто вы?':lang==='pt'?'Quem é?':'I am a'}<select value={needRespondentType} onChange={e=>setNeedRespondentType(e.target.value)}><option value="resident">{lang==='ru'?'Житель':'Resident'}</option><option value="visitor">{lang==='ru'?'Турист / гость':'Visitor / tourist'}</option><option value="business">{lang==='ru'?'Представитель бизнеса':'Business'}</option><option value="investor">{lang==='ru'?'Инвестор':'Investor'}</option><option value="other">{lang==='ru'?'Другое':'Other'}</option></select></label>
+                <label>{lang==='ru'?'Муниципалитет':lang==='pt'?'Município':'Municipality'}<select value={needMunicipality} onChange={e=>setNeedMunicipality(e.target.value)}><option value="">{lang==='ru'?'Весь архипелаг / не важно':'All archipelago / not specific'}</option>{metaMunicipalities.map(m=><option key={m.id} value={m.id}>{m['name_'+lang]||m.name_en}</option>)}</select></label>
+                <label>{lang==='ru'?'Категория':lang==='pt'?'Categoria':'Category'}<select value={needCategory} onChange={e=>setNeedCategory(e.target.value)}><option value="housing">{lang==='ru'?'Жильё и недвижимость':'Housing & property'}</option><option value="transport">{lang==='ru'?'Транспорт':'Transport'}</option><option value="healthcare">{lang==='ru'?'Здоровье':'Healthcare'}</option><option value="education">{lang==='ru'?'Образование':'Education'}</option><option value="tourism">{lang==='ru'?'Туризм и отдых':'Tourism & leisure'}</option><option value="environment">{lang==='ru'?'Экология':'Environment'}</option><option value="public_services">{lang==='ru'?'Муниципальные услуги':'Public services'}</option><option value="business">{lang==='ru'?'Бизнес и работа':'Business & jobs'}</option><option value="other">{lang==='ru'?'Другое':'Other'}</option></select></label>
+                <label>{lang==='ru'?'Кратко сформулируйте потребность':lang==='pt'?'Resuma a necessidade':'Summarise the need'}<input value={needTitle} onChange={e=>setNeedTitle(e.target.value)} minLength={5} maxLength={160} required placeholder={lang==='ru'?'Например: вечерний транспорт между…':'For example: evening transport between…'}/></label>
+                <label className="wide">{lang==='ru'?'Подробности и контекст':lang==='pt'?'Detalhes e contexto':'Details and context'}<textarea value={needDescription} onChange={e=>setNeedDescription(e.target.value)} minLength={10} maxLength={2000} required rows={4} placeholder={lang==='ru'?'Что именно нужно, кому и как часто?':'What is needed, for whom and how often?'}/></label>
+              </div>
+              <label className="need-consent"><input type="checkbox" checked={needConsent} onChange={e=>setNeedConsent(e.target.checked)} required/><span>{lang==='ru'?'Я разрешаю использовать это сообщение в обезличенном виде для анализа общих потребностей.':lang==='pt'?'Autorizo a utilização desta mensagem de forma anonimizada para analisar necessidades coletivas.':'I consent to this message being used in anonymised form to analyse shared needs.'}</span></label>
+              <button className="primary" type="submit" disabled={needSubmitBusy||!supabase}>{needSubmitBusy?'…':lang==='ru'?'Отправить на проверку':lang==='pt'?'Enviar para revisão':'Submit for review'} <ArrowUpRight size={15}/></button>
+              {needSubmitMessage&&<p className="need-success" role="status">{needSubmitMessage}</p>}
+              {needSubmitError&&<p className="need-error" role="alert">{needSubmitError}</p>}
+            </form>
+            <small className="need-privacy-note">{lang==='ru'?'Не указывайте имена, телефоны, email, точные домашние адреса и медицинские или другие чувствительные сведения. Сырые сообщения не публикуются и не передаются AI до модерации.':lang==='pt'?'Não inclua nomes, telefones, emails, moradas exatas ou dados médicos/sensíveis. As mensagens originais não são públicas nem enviadas à IA antes da moderação.':'Do not include names, phone numbers, email addresses, exact home addresses or sensitive health information. Raw submissions are private and are not sent to AI before moderation.'}</small>
+          </section>
           <div className="meta-section-heading"><div><span className="eyebrow">05 · PROPERTY & CONSTRUCTION</span><h2>{lang==='ru'?'Земля, планирование и строительство':lang==='pt'?'Terrenos, planeamento e construção':'Land, planning & construction'}</h2></div><span className="meta-count">{metaConstructionIndicators.length} {lang==='ru'?'показателей':'indicators'}</span></div>
           <div className="meta-stats-grid">{metaConstructionIndicators.filter(item=>!item.municipality_id).slice(0,8).map(item=><article key={item.id}><span>{item.metric_label}</span><b>{Number(item.metric_value).toLocaleString(lang==='ru'?'ru-RU':lang==='pt'?'pt-PT':'en-GB')} <small>{item.unit.replaceAll('_',' ')}</small></b><small>{item.reference_year} · {item.comparison_period}</small></article>)}</div>
           <div className="meta-two-columns"><section><div className="meta-section-heading"><div><span className="eyebrow">PLANNING REGISTER</span><h2>{lang==='ru'?'Муниципальные планы':lang==='pt'?'Planos municipais':'Municipal plans'}</h2></div><span className="meta-count">{metaPlanning.length}</span></div>{metaPlanning.length?metaPlanning.filter(item=>metaRegion==='all'||item.municipality_id===metaRegion).map(item=><article className="meta-signal-card" key={item.id}><b>{item.title}</b><p>{item.summary}</p><small>{item.document_type} · {item.status}</small><a href={item.document_url||item.source_url} target="_blank" rel="noreferrer">{lang==='ru'?'Открыть документ':'Open document'} ↗</a></article>):<div className="meta-empty compact"><p>{lang==='ru'?'Реестр муниципальных PDM подключён. Документы будут добавляться после проверки статуса, даты действия и официальной публикации.':lang==='pt'?'O registo de PDM municipais está ligado. Os documentos serão adicionados após validação do estado, vigência e publicação oficial.':'The municipal PDM register is connected. Documents will be added after checking status, effective dates and official publication.'}</p><a href="https://prit.madeira.gov.pt/publico/planos" target="_blank" rel="noreferrer">PRIT — PDM ↗</a></div>}</section>
