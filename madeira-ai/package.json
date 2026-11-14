@@ -12,7 +12,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
     "@vitejs/plugin-react": "latest",
-    "csv-parse": "^6.1.0",
+    "csv-parse": "^7.0.3",
     "dotenv": "^16.4.7",
     "jszip": "^3.10.1",
     "vite": "latest",
