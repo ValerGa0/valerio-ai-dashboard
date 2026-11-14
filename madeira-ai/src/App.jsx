@@ -183,6 +183,12 @@ function App(){
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
   const [authError,setAuthError]=useState('');
+  const [savedError,setSavedError]=useState('');
+  const [inquiryCategory,setInquiryCategory]=useState('travel');
+  const [inquirySubject,setInquirySubject]=useState('');
+  const [inquiryDetails,setInquiryDetails]=useState('');
+  const [inquiryStatus,setInquiryStatus]=useState('');
+  const [inquiryBusy,setInquiryBusy]=useState(false);
   const [busy,setBusy]=useState(false);
   const [assistantBusy,setAssistantBusy]=useState(false);
   const [weatherData,setWeatherData]=useState(null);
@@ -234,24 +240,48 @@ function App(){
     (p.name+' '+p.area+' '+p.tag).toLowerCase().includes(query.toLowerCase())),[filter,query]);
 
   const toggleSaved=async(id)=>{
-    const next=saved.includes(id)?saved.filter(x=>x!==id):[...saved,id];
+    const wasSaved=saved.includes(id);
+    const next=wasSaved?saved.filter(x=>x!==id):[...saved,id];
+    setSavedError('');
     setSaved(next);
     if(supabase&&user){
-      if(next.includes(id)) await supabase.from('saved_places').upsert({user_id:user.id,place_id:id},{onConflict:'user_id,place_id'});
-      else await supabase.from('saved_places').delete().eq('user_id',user.id).eq('place_id',id);
+      try{
+        const result=wasSaved
+          ? await supabase.from('saved_places').delete().eq('user_id',user.id).eq('place_id',id)
+          : await supabase.from('saved_places').upsert({user_id:user.id,place_id:id},{onConflict:'user_id,place_id'});
+        if(result.error) throw result.error;
+      }catch(error){
+        setSaved(saved.filter(x=>wasSaved?x!==id:x!==id));
+        setSavedError(error.message||'Не удалось сохранить место в облаке.');
+      }
     }
   };
 
   const submitAuth=async(e)=>{
     e.preventDefault();setBusy(true);setAuthError('');
-    if(!supabase){setAuthError('Сначала подключите VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY.');setBusy(false);return;}
-    const result=authMode==='signup'
-      ? await supabase.auth.signUp({email,password})
-      : await supabase.auth.signInWithPassword({email,password});
-    if(result.error)setAuthError(result.error.message);
-    else if(authMode==='signup'&&!result.data.session)setAuthError('Проверьте почту и подтвердите регистрацию.');
-    else setAuthOpen(false);
-    setBusy(false);
+    try{
+      if(!supabase) throw new Error('Сначала подключите публичные переменные Supabase для Preview.');
+      const result=authMode==='signup'
+        ? await supabase.auth.signUp({email,password})
+        : await supabase.auth.signInWithPassword({email,password});
+      if(result.error) throw result.error;
+      if(authMode==='signup'&&!result.data.session){setAuthError('Проверьте почту и подтвердите регистрацию.');return;}
+      setAuthOpen(false);setPassword('');
+    }catch(error){setAuthError(error.message||'Не удалось выполнить вход. Попробуйте ещё раз.');}
+    finally{setBusy(false);}
+  };
+
+  const submitInquiry=async(e)=>{
+    e.preventDefault();setInquiryStatus('');
+    if(!user||!supabase){setInquiryStatus('Для отправки обращения войдите в аккаунт.');setAuthOpen(true);return;}
+    setInquiryBusy(true);
+    try{
+      const {error}=await supabase.from('inquiries').insert({user_id:user.id,category:inquiryCategory,subject:inquirySubject.trim(),details:inquiryDetails.trim()});
+      if(error) throw error;
+      setInquirySubject('');setInquiryDetails('');
+      setInquiryStatus('Обращение сохранено. Вы сможете вернуться к нему в следующем обновлении личного кабинета.');
+    }catch(error){setInquiryStatus(error.message||'Не удалось отправить обращение.');}
+    finally{setInquiryBusy(false);}
   };
 
   const signOut=async()=>{if(supabase)await supabase.auth.signOut();setUser(null);};
@@ -307,7 +337,7 @@ function App(){
 
   const placeCard=(p)=> <article className="place-card" key={p.id}>
     <div className={'place-art art-'+p.kind}><p.icon size={31}/><span>{p.tag}</span></div>
-    <div className="place-body"><div className="place-meta"><span><MapPin size={12}/>{p.area}</span><button className={saved.includes(p.id)?'saved active':'saved'} onClick={()=>toggleSaved(p.id)} aria-label="Save place"><Bookmark size={16} fill={saved.includes(p.id)?'currentColor':'none'}/></button></div><h3>{p.name}</h3><p>{p.desc}</p></div>
+    <div className="place-body"><div className="place-meta"><span><MapPin size={12}/>{p.area}</span><button className={saved.includes(p.id)?'saved active':'saved'} onClick={()=>toggleSaved(p.id)} aria-label="Save place"><Bookmark size={16} fill={saved.includes(p.id)?'currentColor':'none'}/></button></div><h3>{p.name}</h3><p>{p.desc}</p>{savedError&&<small className="inline-error" role="alert">{savedError}</small>}</div>
   </article>;
 
   return <div className="app-shell">
@@ -394,7 +424,7 @@ function App(){
 
         {active==='weather'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">ISLAND WEATHER</span><h1>Погода на Мадейре</h1><p>Климат на острове различается по высоте и побережью. Перед походами и поездками сверяйте прогноз и предупреждения.</p></div><div className="weather-grid"><div className="weather-main"><CloudSun size={46}/><span>IPMA · ОФИЦИАЛЬНЫЙ ИСТОЧНИК</span><h2>Прогноз по острову</h2><p>Официальные данные IPMA. Погода в горах может отличаться от побережья.</p><small className="live-stamp">{weatherData?'Получено: '+new Date(weatherData.fetchedAt).toLocaleString():'Загружаем прогноз…'}</small></div><div className="weather-links"><h3>Официальные источники</h3><a href="https://api.ipma.pt/" target="_blank" rel="noreferrer">IPMA API <ArrowUpRight size={14}/></a><a href="https://www.procivmadeira.pt/" target="_blank" rel="noreferrer">Proteção Civil Madeira <ArrowUpRight size={14}/></a></div></div>{weatherError&&<div className="source-note">IPMA временно недоступен: {weatherError}. Проверьте первоисточник.</div>}{weatherData?.warnings?.length>0&&<div className="notice-card weather-warning"><ShieldCheck size={20}/><div><b>Метеопредупреждения для Мадейры</b><p>{weatherData.warnings.map((w,i)=><span key={i}>{w.awarenessTypeName||w.awarenessType||'Предупреждение'} · {w.awarenessLevelName||w.awarenessLevel||'Уровень'} </span>)}</p></div></div>}<div className="forecast-grid">{(weatherData?.locations||[]).filter(x=>x.available).map(location=><article className="forecast-card" key={location.id}><span>{location.name}</span><b>{location.days?.[0]?.maxC??'—'}° <small>/ {location.days?.[0]?.minC??'—'}°</small></b><p>{location.days?.[0]?.date||'—'} · Осадки: {location.days?.[0]?.rainProbability??'—'}%</p><small>IPMA · {location.updatedAt||'обновление не указано'}</small></article>)}</div></section>}
 
-        {active==='concierge'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">MADEIRA AI · CONCIERGE</span><h1>{t.concierge}</h1><p>{t.previewText}</p></div><div className="chat-panel"><div className="chat-top"><div className="ai-avatar"><Sparkles/></div><div><b>MADEIRA AI</b><small>Island assistant · Server API</small></div><span className="preview-pill">API</span></div><div className="chat-messages">{chat.length===0&&<div className="welcome-message"><Sparkles size={25}/><h3>Чем помочь на Мадейре?</h3><p>Спросите о районах, маршрутах, недвижимости или идеях для поездки.</p><div className="suggestions">{['Что посмотреть за 3 дня?','Где искать участок для виллы?','Как подготовиться к походу?'].map(q=><button key={q} onClick={()=>setMessage(q)}>{q}<ArrowUpRight size={13}/></button>)}</div></div>}{chat.map((m,i)=><div className={'chat-bubble '+m.role} key={i}><div>{m.text}</div>{m.role==='assistant'&&m.sources?.length>0&&<div className="chat-sources"><small>ИСТОЧНИКИ · {m.searchedAt?new Date(m.searchedAt).toLocaleString(lang==='ru'?'ru-RU':lang==='pt'?'pt-PT':'en-GB'):''}</small>{m.sources.map((source,j)=><a key={source.url||j} href={source.url} target="_blank" rel="noopener noreferrer">{source.title}<ArrowUpRight size={12}/></a>)}</div>}</div>)}</div><form className="chat-form" onSubmit={sendChat}><input value={message} onChange={e=>setMessage(e.target.value)} placeholder={t.askPlaceholder}/><button className="primary" type="submit" disabled={assistantBusy}><Send size={16}/>{assistantBusy?'…':t.send}</button></form><div className="chat-disclaimer">{assistantBusy?'MADEIRA AI формирует ответ…':'AI-ответы доступны через серверный API. Данные IPMA и официальные источники указаны отдельно.'}</div></div></section>}
+        {active==='concierge'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">MADEIRA AI · CONCIERGE</span><h1>{t.concierge}</h1><p>{t.previewText}</p></div><div className="chat-panel"><div className="chat-top"><div className="ai-avatar"><Sparkles/></div><div><b>MADEIRA AI</b><small>Island assistant · Server API</small></div><span className="preview-pill">API</span></div><div className="chat-messages">{chat.length===0&&<div className="welcome-message"><Sparkles size={25}/><h3>Чем помочь на Мадейре?</h3><p>Спросите о районах, маршрутах, недвижимости или идеях для поездки.</p><div className="suggestions">{['Что посмотреть за 3 дня?','Где искать участок для виллы?','Как подготовиться к походу?'].map(q=><button key={q} onClick={()=>setMessage(q)}>{q}<ArrowUpRight size={13}/></button>)}</div></div>}{chat.map((m,i)=><div className={'chat-bubble '+m.role} key={i}><div>{m.text}</div>{m.role==='assistant'&&m.sources?.length>0&&<div className="chat-sources"><small>ИСТОЧНИКИ · {m.searchedAt?new Date(m.searchedAt).toLocaleString(lang==='ru'?'ru-RU':lang==='pt'?'pt-PT':'en-GB'):''}</small>{m.sources.map((source,j)=><a key={source.url||j} href={source.url} target="_blank" rel="noopener noreferrer">{source.title}<ArrowUpRight size={12}/></a>)}</div>}</div>)}</div><form className="chat-form" onSubmit={sendChat}><input value={message} onChange={e=>setMessage(e.target.value)} placeholder={t.askPlaceholder}/><button className="primary" type="submit" disabled={assistantBusy}><Send size={16}/>{assistantBusy?'…':t.send}</button></form><div className="chat-disclaimer">{assistantBusy?'MADEIRA AI формирует ответ…':'AI-ответы доступны через серверный API. Данные IPMA и официальные источники указаны отдельно.'}</div></div><form className="inquiry-panel" onSubmit={submitInquiry}><div><span className="eyebrow">CLOUD REQUEST</span><h2>{lang==='ru'?'Отправить обращение':lang==='pt'?'Enviar pedido':'Send an enquiry'}</h2><p>{lang==='ru'?'Сохраните вопрос по поездке, недвижимости или бизнесу в тестовом облачном кабинете.':lang==='pt'?'Guarde o seu pedido sobre viagens, imobiliário ou negócios.':'Save a request about travel, property or business in your cloud account.'}</p></div><label>{lang==='ru'?'Категория':lang==='pt'?'Categoria':'Category'}<select value={inquiryCategory} onChange={e=>setInquiryCategory(e.target.value)}><option value="travel">{lang==='ru'?'Путешествия':lang==='pt'?'Viagens':'Travel'}</option><option value="property">{lang==='ru'?'Недвижимость':lang==='pt'?'Imobiliário':'Property'}</option><option value="business">{lang==='ru'?'Бизнес':lang==='pt'?'Negócios':'Business'}</option><option value="transport">{lang==='ru'?'Транспорт':lang==='pt'?'Transportes':'Transport'}</option><option value="other">{lang==='ru'?'Другое':lang==='pt'?'Outro':'Other'}</option></select></label><label>{lang==='ru'?'Тема':lang==='pt'?'Assunto':'Subject'}<input required maxLength={160} value={inquirySubject} onChange={e=>setInquirySubject(e.target.value)} placeholder={lang==='ru'?'Например: участок в Porto Moniz':lang==='pt'?'Ex.: terreno no Porto Moniz':'e.g. Land in Porto Moniz'}/></label><label>{lang==='ru'?'Подробности':lang==='pt'?'Detalhes':'Details'}<textarea rows={4} value={inquiryDetails} onChange={e=>setInquiryDetails(e.target.value)} placeholder={lang==='ru'?'Опишите ваш вопрос…':lang==='pt'?'Descreva o seu pedido…':'Describe your request…'}/></label>{inquiryStatus&&<p className="inquiry-status" role="status">{inquiryStatus}</p>}<button className="primary" type="submit" disabled={inquiryBusy}>{inquiryBusy?(lang==='ru'?'Отправляем…':'Sending…'):(lang==='ru'?'Сохранить обращение':lang==='pt'?'Guardar pedido':'Save enquiry')}</button></form></section>}
 
         <footer className="page-footer"><span>MADEIRA AI · ISLAND INTELLIGENCE</span><span>{t.author}</span></footer>
       </div>
