@@ -1,0 +1,12 @@
+insert into public.island_planning_documents
+(municipality_id,document_type,title,status,document_date,effective_date,source_id,source_url,document_url,summary,checked_at)
+values
+('porto-moniz','pdm','Plano Diretor Municipal do Porto Moniz — Resolução n.º 2/2004/M','in_force','2003-11-07','2004-04-24','porto-moniz-municipality','https://www.portomoniz.pt/pt/atividade-municipal/urbanismo/plano-diretor-municipal','https://www.portomoniz.pt/images/Documentos/Urbanismo/Legislacao/PDM_Porto_Moniz_2004.pdf','The municipal page states the PDM was approved by the Municipal Assembly on 7 November 2003 and the 2004 resolution ratified the plan. The municipality currently states the PDM is under revision; this 2004 plan remains the baseline until a replacement enters into force.',now()),
+('porto-moniz','pdm','Revisão do Plano Diretor Municipal do Porto Moniz — procedimento em curso','under_revision',null,null,'porto-moniz-municipality','https://www.portomoniz.pt/pt/atividade-municipal/urbanismo/plano-diretor-municipal','https://www.portomoniz.pt/pt/atividade-municipal/urbanismo/plano-diretor-municipal','The municipal portal states that the Porto Moniz PDM is in the revision phase. A 2026 municipal meeting record notes the municipality is working with the selected contractor and has requested a detailed timeline; no final adoption date was stated. This is not an approved replacement plan.',now()),
+('porto-moniz','urban_plan','Plano de Urbanização da Vila do Porto Moniz','not_checked',null,null,'porto-moniz-municipality','https://www.portomoniz.pt/pt/atividade-municipal/urbanismo/plano-de-urbanizacao','https://www.portomoniz.pt/pt/atividade-municipal/urbanismo/plano-de-urbanizacao','Municipal urban plan covers approximately 44.3 hectares in the Vila do Porto Moniz and sets detailed land-use, urban structure and development rules. Confirm its current legal status and any amendments before parcel-specific reliance.',now())
+on conflict do nothing;
+
+update public.island_sources
+set update_note='Official Porto Moniz urbanism portal. The 2004 PDM remains the baseline and the municipality states that its revision is in progress; a 2026 council record notes a contractor is preparing a work schedule. Also publishes the Vila urban plan and other urbanism documents. Check current status and detailed plans before parcel assessment.',
+last_checked_at=now(),is_active=true
+where id='porto-moniz-municipality';
