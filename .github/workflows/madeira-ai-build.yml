@@ -1,0 +1,24 @@
+name: MADEIRA AI build
+on:
+  push:
+    paths:
+      - "madeira-ai/**"
+      - ".github/workflows/madeira-ai-build.yml"
+  pull_request:
+    paths:
+      - "madeira-ai/**"
+      - ".github/workflows/madeira-ai-build.yml"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: madeira-ai
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: node --check api/concierge.js && node --check api/weather.js && node --check api/sources.js
+      - run: npm run build

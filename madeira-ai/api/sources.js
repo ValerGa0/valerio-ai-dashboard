@@ -1,0 +1,15 @@
+const sources = [
+  { id: "ipma", category: "weather", name: "IPMA — Portuguese Institute for Sea and Atmosphere", description: "Forecasts, meteorological warnings, sea conditions and observations.", url: "https://api.ipma.pt/", authority: "official", updateNote: "Forecast products carry their own update timestamp." },
+  { id: "visit-madeira-trails", category: "travel", name: "Visit Madeira — hiking and trail status", description: "Official trail status, access conditions, fees and booking guidance.", url: "https://www.visitmadeira.com/en/what-to-do/nature-seekers/activities/hiking/", authority: "official", updateNote: "Check immediately before departure; statuses and access rules can change." },
+  { id: "ifcn", category: "travel", name: "IFCN — classified walking routes", description: "Regional forest and nature conservation authority; official route information and notices.", url: "https://ifcn.madeira.gov.pt/pt/atividades-de-natureza/percursos-pedestres-recomendados.html", authority: "official", updateNote: "Use the current IFCN notice for operational status." },
+  { id: "prit-pdm", category: "property", name: "PRIT — municipal master plans (PDM)", description: "Official status, public documents, consultation and approved municipal plans.", url: "https://prit.madeira.gov.pt/publico/planos", authority: "official", updateNote: "Confirm the applicable plan and parcel constraints with the municipality." },
+  { id: "prit", category: "property", name: "PRIT — Regional Territorial Information Platform", description: "Territorial planning instruments, restrictions, urban-planning tools and geospatial information.", url: "https://prit.madeira.gov.pt/paginaInicial", authority: "official", updateNote: "Parcel-specific buildability requires formal municipal confirmation." },
+  { id: "irig", category: "property", name: "IRIG Madeira — geographic information infrastructure", description: "Regional geospatial catalogue, maps and data services.", url: "https://irig.madeira.gov.pt/paginaInicial", authority: "official", updateNote: "Map layers support due diligence but do not replace legal confirmation." },
+  { id: "simplifica", category: "travel", name: "SIMplifica — regional digital services", description: "Official portal used for classified-trail reservations and regional services.", url: "https://simplifica.madeira.gov.pt/", authority: "official", updateNote: "Availability and prices are shown by the portal at booking time." },
+  { id: "visit-madeira", category: "tourism", name: "Visit Madeira — official tourism portal", description: "Official visitor information, destinations, activities and travel guidance.", url: "https://visitmadeira.com/", authority: "official", updateNote: "Check source pages for their publication or update date." }
+];
+export default function handler(req, res) {
+  if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
+  res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=7200");
+  return res.status(200).json({ generatedAt: new Date().toISOString(), sources });
+}

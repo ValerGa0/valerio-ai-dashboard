@@ -1,0 +1,45 @@
+# MADEIRA AI
+
+An independent, responsive island platform for travellers, residents, property seekers and investors.
+
+**Product name:** MADEIRA AI  
+**Creator credit:** Created by VALÉRIO
+
+## Included in this first MVP
+
+- Responsive desktop and mobile web app shell.
+- Russian, English and Portuguese interface labels.
+- Explore section with Madeira points of interest and an OpenStreetMap embed.
+- Real-estate area guide and a property due-diligence checklist.
+- Travel, transport, weather and business-opportunity sections.
+- Guest mode and Supabase email/password authentication.
+- Saved places stored in Supabase for signed-in users (local browser storage in guest mode).
+- Server-side AI concierge endpoint (`/api/concierge`) using an OpenAI API key stored only in Vercel environment variables.
+- Live IPMA daily forecast endpoint (`/api/weather`) for Funchal and Porto Santo, plus official source directory (`/api/sources`).
+- Official Madeira source links for IFCN trail status, Visit Madeira, PRIT municipal plans and IRIG geospatial data.
+
+## Run locally
+
+1. Open this folder as the Vite project root.
+2. Install dependencies: `npm install`
+3. Copy `.env.example` to `.env.local` and enter the Supabase project URL and publishable/anon key.
+4. Apply `supabase/migrations/202611130001_madeira_ai.sql` in the Supabase SQL Editor.
+5. Start: `npm run dev`
+
+Without Supabase environment values, the app runs in guest/demo mode. Cloud authentication and cloud saved places require the migration and environment values.
+
+## Deploy to Vercel
+
+Import the repository and set **Root Directory** to `madeira-ai`. Vercel will detect Vite; use `npm run build` and `dist` as the output directory. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables. Add `OPENAI_API_KEY` as a server-only environment variable (do not prefix it with `VITE_`). Optionally set `OPENAI_MODEL` (default `gpt-4.1-mini`).
+
+## Honest MVP boundaries
+
+This version now reads daily weather forecasts from the official IPMA open-data API and links to official trail and territorial-planning sources. It does not provide live property listings, verified booking inventory, trail-booking inventory, payments, or a full continuously monitored investment feed. The AI concierge requires `OPENAI_API_KEY` to be configured in the Vercel server environment. Never put an OpenAI secret key in browser code.
+
+## Next implementation milestones
+
+1. Connect the Supabase and Vercel accounts, apply the Supabase migration and verify cloud authentication and saved-place persistence.
+2. Configure `OPENAI_API_KEY` in Vercel and test the server-side concierge.
+3. Add verified property and business listings with source links and timestamps.
+4. Add live trail-status ingestion and booking-provider integrations where permitted.
+5. Add booking/partner workflows and production mobile packaging.
