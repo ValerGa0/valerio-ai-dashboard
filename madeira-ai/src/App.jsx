@@ -422,6 +422,7 @@ function App(){
           <div className="meta-section-heading"><div><span className="eyebrow">05 · TRUSTED DATA</span><h2>{lang==='ru'?'Источники данных архипелага':lang==='pt'?'Fontes de dados do arquipélago':'Archipelago data sources'}</h2></div><span className="meta-count">{sources.length}</span></div>
           <div className="meta-source-grid">{sources.map(source=><a href={source.url} key={source.id} target="_blank" rel="noreferrer"><span>{source.authority}</span><b>{source.name}</b><small>{source.updateNote}</small></a>)}</div>
           <div className="meta-disclaimer">{lang==='ru'?'Статус «не найдено» не означает, что объекта или услуги не существует. Потребности и инвестиционные идеи должны проходить отдельную проверку.':lang==='pt'?'A ausência de um registo não prova que o serviço não exista. Necessidades e ideias de investimento exigem validação própria.':'An absent listing does not prove a service does not exist. Needs and investment ideas require independent validation.'}</div>
+          <IslandMap businesses={businessesData} lang={lang}/>
         </section>}
 
         {active==='explore'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">EXPLORE MADEIRA</span><h1>{t.places}</h1><p>{t.intro}</p></div><div className="filter-row">{[['all',t.all],['nature',t.nature],['city',t.city],['coast',t.coast]].map(([id,label])=><button key={id} onClick={()=>setFilter(id)} className={filter===id?'filter active':'filter'}>{label}</button>)}</div><div className="places-grid">{visiblePlaces.map(placeCard)}</div>
