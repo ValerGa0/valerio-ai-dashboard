@@ -31,7 +31,7 @@ An independent, responsive island platform for travellers, residents, property s
 1. Open this folder as the Vite project root.
 2. Install dependencies: `npm install`
 3. Copy `.env.example` to `.env.local` and enter the Supabase project URL and publishable/anon key.
-4. Apply these migrations in order: `202611130001_madeira_ai.sql`, `202611140002_meta_madeira_island_intelligence.sql`, `202611140003_meta_madeira_foreign_key_indexes.sql`, `202611140004_import_porto_moniz_directory.sql`, `202611140005_archipelago_sources.sql`, `202611140006_property_construction_data.sql`, `202611140007_private_need_submissions.sql`, `202611140008_ai_analysis_usage_limit.sql`, `202611140009_import_machico_directory.sql`, `202611140010_refine_official_indicators.sql`.
+4. Apply these migrations in order: `202611130001_madeira_ai.sql`, `202611140002_meta_madeira_island_intelligence.sql`, `202611140003_meta_madeira_foreign_key_indexes.sql`, `202611140004_import_porto_moniz_directory.sql`, `202611140005_archipelago_sources.sql`, `202611140006_property_construction_data.sql`, `202611140007_private_need_submissions.sql`, `202611140008_ai_analysis_usage_limit.sql`, `202611140009_import_machico_directory.sql`, `202611140010_refine_official_indicators.sql`, `202611140011_archipelago_fk_indexes.sql`.
 5. Start: `npm run dev`
 
 Without Supabase environment values, the app runs in guest/demo mode. Cloud authentication and cloud saved places require the migration and environment values.
