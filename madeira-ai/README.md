@@ -10,7 +10,7 @@ An independent, responsive island platform for travellers, residents, property s
 
 - Responsive desktop and mobile web app shell.
 - MADEIRA AI archipelago-intelligence workspace covering all 10 Madeira municipalities and Porto Santo, backed by a central Supabase data model for sources, directory entries, needs and opportunities.
-- Official-source register with provenance notes and verification statuses; public data tables are read-only under Row Level Security.
+- Official-source register with provenance notes and verification statuses; public catalogue tables are read-only under Row Level Security.
 - Russian, English and Portuguese interface labels.
 - Explore section with Madeira points of interest and an OpenStreetMap embed.
 - Real-estate area guide and a property due-diligence checklist.
@@ -20,13 +20,17 @@ An independent, responsive island platform for travellers, residents, property s
 - Server-side AI concierge endpoint (`/api/concierge`) using an OpenAI API key stored only in Vercel environment variables.
 - Live IPMA daily forecast endpoint (`/api/weather`) for Funchal and Porto Santo, plus official source directory (`/api/sources`).
 - Official Madeira source links for IFCN trail status, Visit Madeira, PRIT municipal plans and IRIG geospatial data.
+- Initial shared directory import: 29 Porto Moniz records (17 municipal restaurant listings plus accommodation, transport, activity, retail and service leads), with verification status and source provenance.
+- Archipelago source register covering municipal portals, municipal business directories, PRIT and DREM business/construction/housing statistics.
+- Property and planning data model for municipal plans and public land opportunities, plus 26 official regional/municipal business and construction indicators.
+- Private, authenticated community-needs submission workflow with consent and moderation; raw submissions are not public.
 
 ## Run locally
 
 1. Open this folder as the Vite project root.
 2. Install dependencies: `npm install`
 3. Copy `.env.example` to `.env.local` and enter the Supabase project URL and publishable/anon key.
-4. Apply `supabase/migrations/202611130001_madeira_ai.sql` and `supabase/migrations/202611140002_meta_madeira_island_intelligence.sql` in the Supabase SQL Editor.
+4. Apply the migrations in order: `202611130001_madeira_ai.sql`, `202611140002_meta_madeira_island_intelligence.sql`, `202611140003_meta_madeira_foreign_key_indexes.sql`, `202611140004_import_porto_moniz_directory.sql`, `202611140005_archipelago_sources.sql`, `202611140006_property_construction_data.sql`, and `202611140007_private_need_submissions.sql`.
 5. Start: `npm run dev`
 
 Without Supabase environment values, the app runs in guest/demo mode. Cloud authentication and cloud saved places require the migration and environment values.
@@ -45,5 +49,6 @@ This version now reads daily weather forecasts from the official IPMA open-data 
 2. Configure `OPENAI_API_KEY` in Vercel and test the server-side concierge.
 3. Add verified property and business listings with source links and timestamps.
 4. Add live trail-status ingestion and booking-provider integrations where permitted.
-5. Populate and validate directory entries across all 11 municipalities, then add need/opportunity research workflows.
+5. Populate and validate directory entries across all 11 municipalities; import official PDM/land-bank records and municipality-level construction statistics.
+6. Review private community submissions, publish only anonymised validated needs, and connect the curated evidence to AI opportunity analysis.
 6. Add booking/partner workflows and production mobile packaging.
