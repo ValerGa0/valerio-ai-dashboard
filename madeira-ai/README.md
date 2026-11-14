@@ -20,7 +20,7 @@ An independent, responsive island platform for travellers, residents, property s
 - Server-side AI concierge endpoint (`/api/concierge`) using an OpenAI API key stored only in Vercel environment variables.
 - Live IPMA daily forecast endpoint (`/api/weather`) for Funchal and Porto Santo, plus official source directory (`/api/sources`).
 - Official Madeira source links for IFCN trail status, Visit Madeira, PRIT municipal plans and IRIG geospatial data.
-- Initial shared directory import: 98 records across Porto Moniz (29), Machico (35), Calheta (28) and Ponta do Sol (6) (17 municipal restaurant listings plus accommodation, transport, activity, retail and service leads), with verification status and source provenance.
+- Initial shared directory import: 124 records across Porto Moniz (29), Machico (35), Calheta (31), Ponta do Sol (26), Funchal (1), Santa Cruz (1) and São Vicente (1) (17 municipal restaurant listings plus accommodation, transport, activity, retail and service leads), with verification status and source provenance.
 - Archipelago source register covering municipal portals, municipal business directories, PRIT and DREM business/construction/housing statistics.
 - Property and planning data model for municipal plans and public land opportunities, plus 40 official regional/municipal business and construction indicators.
 - Private, authenticated community-needs submission workflow with consent and moderation; raw submissions are not public.
@@ -31,7 +31,7 @@ An independent, responsive island platform for travellers, residents, property s
 1. Open this folder as the Vite project root.
 2. Install dependencies: `npm install`
 3. Copy `.env.example` to `.env.local` and enter the Supabase project URL and publishable/anon key.
-4. Apply these migrations in order: `202611130001_madeira_ai.sql`, `202611140002_meta_madeira_island_intelligence.sql`, `202611140003_meta_madeira_foreign_key_indexes.sql`, `202611140004_import_porto_moniz_directory.sql`, `202611140005_archipelago_sources.sql`, `202611140006_property_construction_data.sql`, `202611140007_private_need_submissions.sql`, `202611140008_ai_analysis_usage_limit.sql`, `202611140009_import_machico_directory.sql`, `202611140010_refine_official_indicators.sql`, `202611140011_archipelago_fk_indexes.sql`, `202611140012_import_calheta_ponta_do_sol_tourism.sql`, and `202611140013_import_calheta_ponta_pdm.sql`.
+4. Apply these migrations in order: `202611130001_madeira_ai.sql`, `202611140002_meta_madeira_island_intelligence.sql`, `202611140003_meta_madeira_foreign_key_indexes.sql`, `202611140004_import_porto_moniz_directory.sql`, `202611140005_archipelago_sources.sql`, `202611140006_property_construction_data.sql`, `202611140007_private_need_submissions.sql`, `202611140008_ai_analysis_usage_limit.sql`, `202611140009_import_machico_directory.sql`, `202611140010_refine_official_indicators.sql`, `202611140011_archipelago_fk_indexes.sql`, `202611140012_import_calheta_ponta_do_sol_tourism.sql`, and `202611140013_import_calheta_ponta_pdm.sql`, `202611140014_expand_ponta_sol_calheta_tourism.sql`, and `202611140015_correct_directory_municipalities.sql`.
 5. Start: `npm run dev`
 
 Without Supabase environment values, the app runs in guest/demo mode. Cloud authentication and cloud saved places require the migration and environment values.
