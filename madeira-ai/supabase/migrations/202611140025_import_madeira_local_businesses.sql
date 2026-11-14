@@ -1,0 +1,20 @@
+-- Add a first verified-by-company-website batch of local productive businesses.
+-- These are source-listed records; current operations should still be reconfirmed.
+insert into public.island_sources
+(id,name,category,publisher,url,authority,scope,update_note,last_checked_at,is_active)
+values
+('bordal-company','Bordal — Bordados da Madeira','economy','Bordal','https://www.bordal.pt/','company','Funchal','Company website publishes its Funchal shop/factory address and contact details.',now(),true),
+('hh-company','Henriques & Henriques — company contacts','economy','Henriques & Henriques','https://henriquesehenriques.pt/contactos-e-emails/','company','Câmara de Lobos','Company website publishes its Câmara de Lobos commercial premises and telephone.',now(),true),
+('barbeito-company','Vinhos Barbeito — company contacts','economy','Vinhos Barbeito','https://www.vinhosbarbeito.com/en/contacts.html','company','Câmara de Lobos','Company website publishes its Câmara de Lobos industrial-park address and telephone.',now(),true),
+('mwc-company','Madeira Wine Company — contacts and facilities','economy','Madeira Wine Company','https://www.madeirawinecompany.com/en/contacts.html','company','Santa Cruz / Funchal','Company website publishes winery address in Caniçal and Blandy’s Wine Lodge contact in Funchal.',now(),true)
+on conflict (id) do update set name=excluded.name,category=excluded.category,publisher=excluded.publisher,url=excluded.url,authority=excluded.authority,scope=excluded.scope,update_note=excluded.update_note,last_checked_at=now(),is_active=true;
+
+insert into public.island_directory_entries
+(external_key,name,category,description,municipality_id,address,phone,website,source_id,source_url,verification_status,last_verified_at,is_active)
+values
+('bordal-funchal','Bordal — Bordados da Madeira','business_support','Madeira embroidery manufacturer, shop and living museum; offers traditional production and workshops.','funchal','Rua Dr. Fernão de Ornelas, 77, Funchal','291 222 965','https://www.bordal.pt/','bordal-company','https://www.bordal.pt/','source_listed',now(),true),
+('henriques-henriques-camara-lobos','Henriques & Henriques — Vinhos','business_support','Madeira wine producer founded in 1850; company premises and Wine Lodge in Câmara de Lobos.','camara-de-lobos','Avenida da Autónoma, 10, 9300-138 Câmara de Lobos','291 941 551','https://henriquesehenriques.pt/','hh-company','https://henriquesehenriques.pt/contactos-e-emails/','source_listed',now(),true),
+('vinhos-barbeito-camara-lobos','Vinhos Barbeito','business_support','Madeira wine producer with winery at Parque Empresarial de Câmara de Lobos.','camara-de-lobos','Estrada da Ribeira Garcia, Parque Empresarial de Câmara de Lobos, Lote 8, 9300-324 Câmara de Lobos','291 761 829','https://www.vinhosbarbeito.com/','barbeito-company','https://www.vinhosbarbeito.com/en/contacts.html','source_listed',now(),true),
+('madeira-wine-company-canical','Madeira Wine Company — Winery','business_support','Madeira wine producer and exporter; winery and production facilities in Caniçal.','santa-cruz','Plataforma 3, Pavilhão T, Zona Franca Industrial da Madeira, 9200-047 Caniçal','291 740 100','https://www.madeirawinecompany.com/','mwc-company','https://www.madeirawinecompany.com/en/contacts.html','source_listed',now(),true),
+('blandys-wine-lodge-funchal','Blandy’s Wine Lodge','business_support','Historic Madeira wine lodge in central Funchal offering guided visits, tastings and events.','funchal','Avenida Arriaga, 28, 9000-064 Funchal','291 228 978','https://www.madeirawinecompany.com/en/wine-tourism/blandys-wine-lodge.html','mwc-company','https://www.madeirawinecompany.com/en/contacts.html','source_listed',now(),true)
+on conflict (external_key) do update set name=excluded.name,category=excluded.category,description=excluded.description,municipality_id=excluded.municipality_id,address=excluded.address,phone=excluded.phone,website=excluded.website,source_id=excluded.source_id,source_url=excluded.source_url,verification_status=excluded.verification_status,last_verified_at=now(),is_active=true;
