@@ -10,7 +10,7 @@ import IslandMap from './IslandMap';
 
 const copy = {
   ru: {
-    nav:['Обзор','Исследовать','Недвижимость','Путешествия','Бизнес и инвестиции','Транспорт','Погода','AI-консьерж'],
+    nav:['Обзор','META MADEIRA','Исследовать','Недвижимость','Путешествия','Бизнес и инвестиции','Транспорт','Погода','AI-консьерж'],
     eyebrow:'ОДИН ОСТРОВ · МНОГО ВОЗМОЖНОСТЕЙ',
     headline:'Откройте Мадейру\nпо-новому.',
     intro:'Ваш интеллектуальный центр острова — для путешествий, жизни, недвижимости и новых идей.',
@@ -31,7 +31,7 @@ const copy = {
     locationTitle:'Погода рядом с вами', locationHint:'Нажмите кнопку, чтобы показать погоду и город по GPS.', locate:'Определить моё местоположение', locating:'Определяем местоположение…', refreshLocation:'Обновить', feelsLike:'Ощущается как', humidity:'Влажность', wind:'Ветер', locationPermission:'Разрешите доступ к геолокации в браузере.', locationUnavailable:'Геолокация недоступна на этом устройстве.', locationFailed:'Не удалось определить местоположение. Проверьте разрешение браузера.'
   },
   en: {
-    nav:['Overview','Explore','Real estate','Travel','Business & invest','Transport','Weather','AI concierge'],
+    nav:['Overview','META MADEIRA','Explore','Real estate','Travel','Business & invest','Transport','Weather','AI concierge'],
     eyebrow:'ONE ISLAND · MANY POSSIBILITIES',
     headline:'Discover Madeira\nin a new way.',
     intro:'Your intelligent island hub for travel, living, real estate and new opportunities.',
@@ -51,7 +51,7 @@ const copy = {
     locationTitle:'Weather near you', locationHint:'Use the button to show local weather and your city using GPS.', locate:'Use my location', locating:'Finding your location…', refreshLocation:'Refresh', feelsLike:'Feels like', humidity:'Humidity', wind:'Wind', locationPermission:'Allow location access in your browser.', locationUnavailable:'Geolocation is unavailable on this device.', locationFailed:'Could not determine your location. Check browser permission.'
   },
   pt: {
-    nav:['Visão geral','Explorar','Imobiliário','Viagens','Negócios e investimento','Transportes','Tempo','Assistente IA'],
+    nav:['Visão geral','META MADEIRA','Explorar','Imobiliário','Viagens','Negócios e investimento','Transportes','Tempo','Assistente IA'],
     eyebrow:'UMA ILHA · MUITAS POSSIBILIDADES',
     headline:'Descubra a Madeira\nde uma nova forma.',
     intro:'O seu centro inteligente da ilha para viajar, viver, imobiliário e novas oportunidades.',
@@ -193,6 +193,13 @@ function App(){
   const [locationError,setLocationError]=useState('');
   const [sources,setSources]=useState([]);
   const [businessesData,setBusinessesData]=useState([]);
+  const [metaMunicipalities,setMetaMunicipalities]=useState([]);
+  const [metaDirectory,setMetaDirectory]=useState([]);
+  const [metaNeeds,setMetaNeeds]=useState([]);
+  const [metaOpportunities,setMetaOpportunities]=useState([]);
+  const [metaLoading,setMetaLoading]=useState(false);
+  const [metaError,setMetaError]=useState('');
+  const [metaRegion,setMetaRegion]=useState('all');
   const [businessCategory,setBusinessCategory]=useState('all');
   const [businessParish,setBusinessParish]=useState('all');
   const [businessQuery,setBusinessQuery]=useState('');
@@ -219,6 +226,26 @@ function App(){
   useEffect(()=>{
     fetch('/api/sources').then(r=>r.ok?r.json():Promise.reject()).then(data=>setSources(data.sources||[])).catch(()=>setSources([]));
   },[]);
+
+  useEffect(()=>{
+    if(active!=='meta') return;
+    if(!supabase){setMetaError('Для общей базы META MADEIRA подключите Supabase Preview.');return;}
+    let cancelled=false;
+    setMetaLoading(true);setMetaError('');
+    Promise.all([
+      supabase.from('island_municipalities').select('id,island,name_pt,name_en,name_ru').order('name_pt'),
+      supabase.from('island_directory_entries').select('id,name,category,municipality_id,description,address,website,source_url,verification_status,last_verified_at').eq('is_active',true).order('name'),
+      supabase.from('island_needs').select('id,title,category,municipality_id,description,validation_status,priority').order('priority',{ascending:false}),
+      supabase.from('island_opportunities').select('id,title,category,municipality_id,description,status').order('created_at',{ascending:false})
+    ]).then(results=>{
+      if(cancelled)return;
+      const failed=results.find(result=>result.error);
+      if(failed)throw failed.error;
+      setMetaMunicipalities(results[0].data||[]);setMetaDirectory(results[1].data||[]);setMetaNeeds(results[2].data||[]);setMetaOpportunities(results[3].data||[]);
+    }).catch(error=>{if(!cancelled)setMetaError(error.message||'Не удалось загрузить общую базу острова.');})
+      .finally(()=>{if(!cancelled)setMetaLoading(false);});
+    return ()=>{cancelled=true;};
+  },[active]);
 
   useEffect(()=>{
     if(active!=='weather'||weatherData) return;
@@ -311,7 +338,7 @@ function App(){
 
   const renderHeader=()=> <header className="topbar">
     <button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)} aria-label="Menu"><Menu size={20}/></button>
-    <div className="crumb"><span>MADEIRA AI</span><i>/</i>{t.nav[['overview','explore','property','travel','invest','transport','weather','concierge'].indexOf(active)]}</div>
+    <div className="crumb"><span>MADEIRA AI</span><i>/</i>{t.nav[['overview','meta','explore','property','travel','invest','transport','weather','concierge'].indexOf(active)]}</div>
     <div className="top-actions">
       <label className="searchbox"><Search size={16}/><input value={query} onChange={e=>{setQuery(e.target.value);if(active==='overview')setActive('explore');}} placeholder={t.search}/><kbd>⌘ K</kbd></label>
       <select className="language" value={lang} onChange={e=>setLang(e.target.value)} aria-label="Language"><option value="ru">RU</option><option value="en">EN</option><option value="pt">PT</option></select>
@@ -328,8 +355,8 @@ function App(){
     <aside className={'sidebar '+(mobileOpen?'open':'')}>
       <div className="brand"><div className="brand-mark"><Compass size={23}/></div><div><b>MADEIRA AI</b><small>ISLAND INTELLIGENCE</small></div><button className="close-menu" onClick={()=>setMobileOpen(false)}><X size={18}/></button></div>
       <div className="side-label">DISCOVER</div>
-      <nav>{['overview','explore','property','travel','invest','transport','weather','concierge'].map((id,i)=>{
-        const icons=[Map,Compass,Building2,Plane,BriefcaseBusiness,CarFront,CloudSun,MessageCircle];const Icon=icons[i];
+      <nav>{['overview','meta','explore','property','travel','invest','transport','weather','concierge'].map((id,i)=>{
+        const icons=[Map,Globe2,Compass,Building2,Plane,BriefcaseBusiness,CarFront,CloudSun,MessageCircle];const Icon=icons[i];
         return <button key={id} className={active===id?'nav-item active':'nav-item'} onClick={()=>openSection(id)}><Icon size={17}/><span>{t.nav[i]}</span>{id==='concierge'&&<span className="new-dot"/>}</button>;
       })}</nav>
       <div className="sidebar-bottom">
@@ -370,6 +397,31 @@ function App(){
             <div className="places-grid">{places.slice(0,3).map(placeCard)}</div>
           </div>
           <div className="bottom-promo"><div className="promo-icon"><Sparkles/></div><div><span className="eyebrow">MADEIRA AI CONCIERGE</span><h2>{t.concierge}</h2><p>{t.previewText}</p></div><button className="primary" onClick={()=>openSection('concierge')}>{t.ask}<ArrowUpRight size={16}/></button></div>
+        </section>}
+
+        {active==='meta'&&<section className="module-page meta-page">
+          <div className="module-intro"><span className="eyebrow">META MADEIRA · ISLAND INTELLIGENCE</span><h1>META MADEIRA</h1><p>{lang==='ru'?'Единая цифровая система Мадейры и Порту-Санту: что существует, чего не хватает и где появляются возможности.':lang==='pt'?'Sistema digital integrado da Madeira e do Porto Santo: o que existe, o que falta e onde surgem oportunidades.':'A unified digital system for Madeira and Porto Santo: what exists, what is missing and where opportunities emerge.'}</p></div>
+          <div className="meta-stats-grid">
+            <article><span>{lang==='ru'?'Муниципалитеты':lang==='pt'?'Municípios':'Municipalities'}</span><b>{metaMunicipalities.length||'—'}</b><small>{lang==='ru'?'Мадейра + Порту-Санту':lang==='pt'?'Madeira + Porto Santo':'Madeira + Porto Santo'}</small></article>
+            <article><span>{lang==='ru'?'Источники':lang==='pt'?'Fontes':'Sources'}</span><b>{sources.length||'—'}</b><small>{lang==='ru'?'Реестр официальных данных':lang==='pt'?'Registo de dados oficiais':'Official source register'}</small></article>
+            <article><span>{lang==='ru'?'Объекты каталога':lang==='pt'?'Locais no catálogo':'Directory entries'}</span><b>{metaDirectory.length}</b><small>{lang==='ru'?'Только записи в общей базе':lang==='pt'?'Registos na base central':'Records in the central database'}</small></article>
+            <article><span>{lang==='ru'?'Потребности / идеи':lang==='pt'?'Necessidades / ideias':'Needs / opportunities'}</span><b>{metaNeeds.length+metaOpportunities.length}</b><small>{lang==='ru'?'С проверкой доказательств':lang==='pt'?'Com validação de evidências':'Evidence-led tracking'}</small></article>
+          </div>
+          <div className="meta-section-heading"><div><span className="eyebrow">01 · TERRITORIAL COVERAGE</span><h2>{lang==='ru'?'11 муниципалитетов архипелага':lang==='pt'?'11 municípios do arquipélago':'11 municipalities of the archipelago'}</h2></div><span className="meta-live-state">{metaLoading?'SYNC…':metaError?'CHECK CONNECTION':'DATABASE'}</span></div>
+          {metaError&&<div className="meta-error" role="alert">{metaError}</div>}
+          <div className="meta-municipality-grid">{metaMunicipalities.map(m=>{
+            const count=metaDirectory.filter(x=>x.municipality_id===m.id).length;
+            const needs=metaNeeds.filter(x=>x.municipality_id===m.id).length;
+            return <button type="button" key={m.id} className={metaRegion===m.id?'meta-municipality active':'meta-municipality'} onClick={()=>setMetaRegion(metaRegion===m.id?'all':m.id)}><span>{m.island==='porto_santo'?'PORTO SANTO':'MADEIRA'}</span><b>{m['name_'+lang]||m.name_en}</b><small>{count} {lang==='ru'?'объектов':'entries'} · {needs} {lang==='ru'?'потребностей':'needs'}</small></button>;
+          })}</div>
+          <div className="meta-section-heading"><div><span className="eyebrow">02 · DIRECTORY</span><h2>{lang==='ru'?'Что уже существует':lang==='pt'?'O que já existe':'What already exists'}</h2></div><span className="meta-count">{metaDirectory.length} {lang==='ru'?'записей':'records'}</span></div>
+          <div className="meta-filter-row"><button className={metaRegion==='all'?'active':''} onClick={()=>setMetaRegion('all')}>{lang==='ru'?'Весь архипелаг':lang==='pt'?'Todo o arquipélago':'All islands'}</button>{metaMunicipalities.map(m=><button key={m.id} className={metaRegion===m.id?'active':''} onClick={()=>setMetaRegion(m.id)}>{m.name_pt}</button>)}</div>
+          {metaDirectory.filter(x=>metaRegion==='all'||x.municipality_id===metaRegion).length===0?<div className="meta-empty"><Globe2 size={26}/><b>{lang==='ru'?'Каталог готов к наполнению':lang==='pt'?'Catálogo pronto a ser preenchido':'Directory ready for verified records'}</b><p>{lang==='ru'?'Единая структура уже создана. Сейчас в базе нет загруженных карточек организаций — мы будем добавлять их только вместе с источником, датой проверки и статусом достоверности.':lang==='pt'?'A estrutura central já existe. Ainda não há registos de organizações carregados; cada entrada será adicionada com fonte, data de verificação e estado de confiança.':'The central structure is in place. No organization records have been imported yet; each entry will carry its source, verification date and confidence status.'}</p></div>:<div className="meta-directory-grid">{metaDirectory.filter(x=>metaRegion==='all'||x.municipality_id===metaRegion).map(entry=><article key={entry.id} className="meta-directory-card"><span>{entry.category}</span><b>{entry.name}</b><p>{entry.description||entry.address||''}</p><small>{entry.verification_status.replace('_',' ')}{entry.last_verified_at?' · '+new Date(entry.last_verified_at).toLocaleDateString():''}</small>{(entry.source_url||entry.website)&&<a href={entry.source_url||entry.website} target="_blank" rel="noreferrer">{lang==='ru'?'Открыть источник':'Open source'} ↗</a>}</article>)}</div>}
+          <div className="meta-two-columns"><section><div className="meta-section-heading"><div><span className="eyebrow">03 · NEEDS MAP</span><h2>{lang==='ru'?'Чего не хватает':lang==='pt'?'O que faz falta':'What is missing'}</h2></div><span className="meta-count">{metaNeeds.length}</span></div>{metaNeeds.length?metaNeeds.filter(x=>metaRegion==='all'||x.municipality_id===metaRegion).map(item=><article className="meta-signal-card" key={item.id}><b>{item.title}</b><p>{item.description}</p><small>{item.category} · {item.validation_status}</small></article>):<div className="meta-empty compact"><p>{lang==='ru'?'Потребности пока не объявляются фактами. Они будут добавляться после проверки статистики, муниципальных документов и свидетельств жителей.':'Needs are not presented as facts without evidence. They will be added after checking statistics, municipal documents and resident feedback.'}</p></div>}</section>
+            <section><div className="meta-section-heading"><div><span className="eyebrow">04 · OPPORTUNITY RADAR</span><h2>{lang==='ru'?'Что можно создать':lang==='pt'?'O que pode ser criado':'What could be built'}</h2></div><span className="meta-count">{metaOpportunities.length}</span></div>{metaOpportunities.length?metaOpportunities.filter(x=>metaRegion==='all'||x.municipality_id===metaRegion).map(item=><article className="meta-signal-card opportunity" key={item.id}><b>{item.title}</b><p>{item.description}</p><small>{item.category} · {item.status}</small></article>):<div className="meta-empty compact"><p>{lang==='ru'?'Идеи для бизнеса и инвестиций будут связаны с конкретной потребностью и подтверждающими источниками.':'Business and investment ideas will be linked to a concrete need and supporting evidence.'}</p></div>}</section></div>
+          <div className="meta-section-heading"><div><span className="eyebrow">05 · TRUSTED DATA</span><h2>{lang==='ru'?'Источники данных архипелага':lang==='pt'?'Fontes de dados do arquipélago':'Archipelago data sources'}</h2></div><span className="meta-count">{sources.length}</span></div>
+          <div className="meta-source-grid">{sources.map(source=><a href={source.url} key={source.id} target="_blank" rel="noreferrer"><span>{source.authority}</span><b>{source.name}</b><small>{source.updateNote}</small></a>)}</div>
+          <div className="meta-disclaimer">{lang==='ru'?'Статус «не найдено» не означает, что объекта или услуги не существует. Потребности и инвестиционные идеи должны проходить отдельную проверку.':lang==='pt'?'A ausência de um registo não prova que o serviço não exista. Necessidades e ideias de investimento exigem validação própria.':'An absent listing does not prove a service does not exist. Needs and investment ideas require independent validation.'}</div>
         </section>}
 
         {active==='explore'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">EXPLORE MADEIRA</span><h1>{t.places}</h1><p>{t.intro}</p></div><div className="filter-row">{[['all',t.all],['nature',t.nature],['city',t.city],['coast',t.coast]].map(([id,label])=><button key={id} onClick={()=>setFilter(id)} className={filter===id?'filter active':'filter'}>{label}</button>)}</div><div className="places-grid">{visiblePlaces.map(placeCard)}</div>
