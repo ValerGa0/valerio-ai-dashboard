@@ -164,12 +164,19 @@ const ideas = [
   {title:'Локальные впечатления вне высокого сезона',kind:'Партнёрства',priority:'Исследовать',text:'Проверить возможности совместных предложений с местными операторами и производителями.'}
 ];
 
+function readSavedPlaces(){
+  try{
+    const value=JSON.parse(window.localStorage.getItem('madeira-saved')||'[]');
+    return Array.isArray(value)?value.filter(id=>typeof id==='string'):[];
+  }catch(_){return [];}
+}
+
 function App(){
   const [lang,setLang]=useState('ru');
   const [active,setActive]=useState('overview');
   const [filter,setFilter]=useState('all');
   const [query,setQuery]=useState('');
-  const [saved,setSaved]=useState(()=>JSON.parse(localStorage.getItem('madeira-saved')||'[]'));
+  const [saved,setSaved]=useState(readSavedPlaces);
   const [user,setUser]=useState(null);
   const [authOpen,setAuthOpen]=useState(false);
   const [authMode,setAuthMode]=useState('signin');
@@ -201,7 +208,7 @@ function App(){
   },[]);
 
   useEffect(()=>{
-    localStorage.setItem('madeira-saved',JSON.stringify(saved));
+    try{window.localStorage.setItem('madeira-saved',JSON.stringify(saved));}catch(_){/* Storage may be disabled; keep the in-memory session usable. */}
   },[saved]);
 
   useEffect(()=>{
