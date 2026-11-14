@@ -28,7 +28,11 @@ const islandPoints = [
   {id:'veu-noiva',name:'Miradouro do Véu da Noiva',lat:32.8161,lng:-17.0953,category:'viewpoint',description:'Смотровая площадка на северном побережье с видом на водопад.',url:'https://geodiversidade.madeira.gov.pt/index.php/en/geosites/mapa'},
   {id:'encumeada',name:'Encumeada',lat:32.7543,lng:-17.0195,category:'viewpoint',description:'Горный перевал с видами на северную и южную части острова.',url:'https://visitmadeira.com/'},
   {id:'airport',name:'Aeroporto da Madeira',lat:32.6979,lng:-16.7745,category:'transport',description:'Международный аэропорт Мадейры.',url:'https://www.aeroportomadeira.pt/'},
-  {id:'porto-moniz-pools',name:'Piscinas Naturais do Porto Moniz',lat:32.8680,lng:-17.1664,category:'coast',description:'Природные морские бассейны в лавовых породах.',url:'https://www.portomoniz.pt/pt/visitantes'}
+  {id:'porto-moniz-pools',name:'Piscinas Naturais do Porto Moniz',lat:32.8680,lng:-17.1664,category:'coast',description:'Природные морские бассейны в лавовых породах.',url:'https://www.portomoniz.pt/pt/visitantes'},
+  {id:'porto-santo-vila-baleira',name:'Vila Baleira · Porto Santo',lat:33.0580,lng:-16.3370,category:'city',description:'Главный населённый центр острова Порту-Санту.',url:'https://visitmadeira.com/en/where-to-go/porto-santo/'},
+  {id:'porto-santo-airport',name:'Aeroporto do Porto Santo',lat:33.0730,lng:-16.3500,category:'transport',description:'Аэропорт острова Порту-Санту.',url:'https://www.ana.pt/en/opo/home'},
+  {id:'porto-santo-beach',name:'Praia do Porto Santo',lat:33.0530,lng:-16.3100,category:'coast',description:'Главный песчаный пляж острова Порту-Санту.',url:'https://visitmadeira.com/en/where-to-go/porto-santo/'},
+  {id:'porto-santo-pico-castelo',name:'Pico do Castelo · Porto Santo',lat:33.0750,lng:-16.3210,category:'nature',description:'Возвышенность с панорамными видами на остров.',url:'https://visitmadeira.com/en/where-to-go/porto-santo/'}
 ];
 
 const categoryLabels = {
@@ -83,7 +87,7 @@ export default function IslandMap({businesses=[],lang='ru'}){
     let disposed=false;
     loadLeaflet().then(L=>{
       if(disposed||!mapNode.current||mapRef.current)return;
-      const map=L.map(mapNode.current,{scrollWheelZoom:false,preferCanvas:true}).setView([32.75,-17.0],10);
+      const map=L.map(mapNode.current,{scrollWheelZoom:false,preferCanvas:true}).fitBounds([[32.60,-17.30],[33.12,-16.22]],{padding:[18,18],maxZoom:9});
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
       layerRef.current=L.layerGroup().addTo(map);
       mapRef.current=map;
