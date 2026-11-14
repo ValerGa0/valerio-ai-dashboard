@@ -226,6 +226,19 @@ function App(){
   const [directorySearch,setDirectorySearch]=useState('');
   const [chat,setChat]=useState([]);
   const [message,setMessage]=useState('');
+  const [transitFeed,setTransitFeed]=useState(null);
+  const [transitError,setTransitError]=useState('');
+  const [transitBusy,setTransitBusy]=useState(false);
+  const [transitOriginQuery,setTransitOriginQuery]=useState('');
+  const [transitDestinationQuery,setTransitDestinationQuery]=useState('');
+  const [transitOriginOptions,setTransitOriginOptions]=useState([]);
+  const [transitDestinationOptions,setTransitDestinationOptions]=useState([]);
+  const [transitOrigin,setTransitOrigin]=useState(null);
+  const [transitDestination,setTransitDestination]=useState(null);
+  const [transitRoutes,setTransitRoutes]=useState([]);
+  const [transitNearbyStops,setTransitNearbyStops]=useState([]);
+  const [transitSelectedStop,setTransitSelectedStop]=useState(null);
+  const [transitDepartures,setTransitDepartures]=useState([]);
   const [mobileOpen,setMobileOpen]=useState(false);
   const t=copy[lang];
   const directoryGroups={
@@ -302,6 +315,102 @@ function App(){
       .finally(()=>{if(!cancelled)setMetaLoading(false);});
     return ()=>{cancelled=true;};
   },[active]);
+
+  useEffect(()=>{
+    if(active!=='transport') return;
+    if(!supabase){setTransitFeed(null);setTransitError('Для поиска автобусов требуется подключение базы MADEIRA AI Preview.');return;}
+    let cancelled=false;
+    setTransitBusy(true);setTransitError('');
+    supabase.from('transit_feeds')
+      .select('id,publisher_name,feed_version,feed_start_date,feed_end_date,license_status,data_status,downloaded_at')
+      .eq('data_status','ready').order('downloaded_at',{ascending:false}).limit(1).maybeSingle()
+      .then(({data,error})=>{
+        if(cancelled)return;
+        if(error)throw error;
+        setTransitFeed(data||null);
+        if(!data)setTransitError('GTFS-расписание пока не загружено. Официальные планировщик и расписания SIGA доступны ниже.');
+      })
+      .catch(error=>{if(!cancelled)setTransitError(error.message||'Не удалось загрузить автобусные данные.');})
+      .finally(()=>{if(!cancelled)setTransitBusy(false);});
+    return ()=>{cancelled=true;};
+  },[active]);
+
+  const madeiraLocalTimestamp=()=>{
+    const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date());
+    const part=type=>parts.find(x=>x.type===type)?.value||'00';
+    return part('year')+'-'+part('month')+'-'+part('day')+' '+part('hour')+':'+part('minute')+':'+part('second');
+  };
+
+  const searchTransitStops=async()=>{
+    if(!supabase||!transitFeed){setTransitError('Автобусное расписание пока недоступно.');return;}
+    if(!transitOriginQuery.trim()||!transitDestinationQuery.trim()){setTransitError('Укажите остановку отправления и назначения.');return;}
+    setTransitBusy(true);setTransitError('');setTransitRoutes([]);
+    try{
+      const [originResult,destinationResult]=await Promise.all([
+        supabase.rpc('transit_search_stops',{p_query:transitOriginQuery.trim(),p_limit:12}),
+        supabase.rpc('transit_search_stops',{p_query:transitDestinationQuery.trim(),p_limit:12})
+      ]);
+      if(originResult.error)throw originResult.error;
+      if(destinationResult.error)throw destinationResult.error;
+      setTransitOriginOptions(originResult.data||[]);
+      setTransitDestinationOptions(destinationResult.data||[]);
+      setTransitOrigin(null);setTransitDestination(null);
+      if(!(originResult.data||[]).length||!(destinationResult.data||[]).length)setTransitError('Не удалось найти одну из остановок. Попробуйте название соседней остановки или населённого пункта.');
+    }catch(error){setTransitError(error.message||'Ошибка поиска остановок.');}
+    finally{setTransitBusy(false);}
+  };
+
+  const searchTransitRoutes=async()=>{
+    if(!supabase||!transitOrigin||!transitDestination){setTransitError('Выберите обе остановки из списка.');return;}
+    setTransitBusy(true);setTransitError('');setTransitRoutes([]);
+    try{
+      const {data,error}=await supabase.rpc('transit_search_direct_routes',{
+        p_origin_stop_id:transitOrigin.stop_id,
+        p_destination_stop_id:transitDestination.stop_id,
+        p_after_local:madeiraLocalTimestamp(),
+        p_limit:12
+      });
+      if(error)throw error;
+      setTransitRoutes(data||[]);
+      if(!(data||[]).length)setTransitError('Прямые рейсы на ближайшее время не найдены. Проверьте дату и официальные уведомления SIGA.');
+    }catch(error){setTransitError(error.message||'Не удалось построить маршрут.');}
+    finally{setTransitBusy(false);}
+  };
+
+  const findNearbyTransitStops=()=>{
+    if(!supabase||!transitFeed){setTransitError('Автобусное расписание пока недоступно.');return;}
+    if(!navigator.geolocation){setTransitError('Геолокация недоступна в этом браузере.');return;}
+    setTransitBusy(true);setTransitError('');
+    navigator.geolocation.getCurrentPosition(async position=>{
+      try{
+        const {data,error}=await supabase.rpc('transit_nearby_stops',{
+          p_lat:position.coords.latitude,p_lon:position.coords.longitude,p_radius_km:1.5,p_limit:8
+        });
+        if(error)throw error;
+        setTransitNearbyStops(data||[]);
+        setTransitDepartures([]);
+        if(!(data||[]).length)setTransitError('В радиусе 1,5 км остановки не найдены.');
+      }catch(error){setTransitError(error.message||'Не удалось найти ближайшие остановки.');}
+      finally{setTransitBusy(false);}
+    },error=>{
+      setTransitError(error.code===1?'Разрешите доступ к геолокации в браузере.':'Не удалось определить местоположение.');
+      setTransitBusy(false);
+    },{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
+  };
+
+  const loadTransitDepartures=async stop=>{
+    if(!supabase||!stop)return;
+    setTransitSelectedStop(stop);setTransitBusy(true);setTransitError('');setTransitDepartures([]);
+    try{
+      const {data,error}=await supabase.rpc('transit_next_departures',{
+        p_stop_id:stop.stop_id,p_after_local:madeiraLocalTimestamp(),p_limit:12
+      });
+      if(error)throw error;
+      setTransitDepartures(data||[]);
+      if(!(data||[]).length)setTransitError('Ближайшие отправления на этой остановке не найдены.');
+    }catch(error){setTransitError(error.message||'Не удалось загрузить отправления.');}
+    finally{setTransitBusy(false);}
+  };
 
   useEffect(()=>{
     if(active!=='weather'||weatherData) return;
@@ -613,8 +722,38 @@ function App(){
 
         {active==='invest'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">BUSINESS & INVESTMENT</span><h1>{t.business}</h1><p>{t.businessText}</p></div><div className="notice-card"><BriefcaseBusiness size={22}/><div><b>Возможности для дальнейшего исследования</b><p>Ниже — направления для проверки спроса, а не подтверждённые инвестиционные предложения или обещание доходности.</p></div></div><div className="idea-list">{ideas.map((idea,i)=><article className="idea-card" key={idea.title}><div className="idea-number">0{i+1}</div><div><span className="eyebrow">{idea.kind}</span><h3>{idea.title}</h3><p>{idea.text}</p></div><span className="priority">{idea.priority}</span></article>)}</div><div className="official-source-list"><h2>Официальные источники для исследования</h2>{sources.filter(x=>['property','tourism'].includes(x.category)).map(x=><a key={x.id} href={x.url} target="_blank" rel="noreferrer"><b>{x.name}</b><span>{x.description}</span><small>{x.updateNote}</small></a>)}</div></section>}
 
-        {active==='transport'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">ARCHIPELAGO MOBILITY</span><h1>{lang==='ru'?'Транспорт на Мадейре и Порту-Санту':lang==='pt'?'Transportes na Madeira e no Porto Santo':'Transport across Madeira & Porto Santo'}</h1><p>{lang==='ru'?'Единая точка доступа к официальным автобусным маршрутам, уведомлениям, парому и авиарейсам. Расписание открывается у оператора — мы не подменяем его неподтверждёнными данными.':lang==='pt'?'Acesso centralizado aos horários oficiais de autocarros, avisos, ferry e voos. Os horários são consultados junto dos operadores.':'A single access point for official bus routes, service notices, ferry and flight information. Timetables open at the operator; unverified departures are never displayed.'}</p></div><section className="meta-schedule-panel"><div className="meta-section-heading"><div><span className="eyebrow">OFFICIAL TRANSPORT SOURCES</span><h2>{lang==='ru'?'Маршруты и расписания':lang==='pt'?'Percursos e horários':'Routes & timetables'}</h2></div><span className="meta-live-state">{lang==='ru'?'Официальные ссылки':'OFFICIAL LINKS'}</span></div><div className="meta-schedule-links"><a href="https://siga.madeira.gov.pt/public/" target="_blank" rel="noreferrer"><span>BUS ROUTE PLANNER</span><b>SIGA — {lang==='ru'?'Планировщик поездки':'Trip planner'}</b><small>{lang==='ru'?'Выберите пункт отправления, назначения, дату и время на официальном сайте':'Choose origin, destination, date and time on the official website'}</small><em>{lang==='ru'?'Построить маршрут':'Plan a route'} <ArrowUpRight size={13}/></em></a><a href="https://siga.madeira.gov.pt/horarios" target="_blank" rel="noreferrer"><span>BUS · MADEIRA + PORTO SANTO</span><b>SIGA — {lang==='ru'?'Расписания автобусов':'Bus timetables'}</b><small>{lang==='ru'?'Линии, остановки, муниципалитеты и номера рейсов':'Lines, stops, municipalities and service numbers'}</small><em>{lang==='ru'?'Открыть расписание':'Open timetables'} <ArrowUpRight size={13}/></em></a><a href="https://siga.madeira.gov.pt/avisos" target="_blank" rel="noreferrer"><span>SERVICE NOTICES</span><b>SIGA — {lang==='ru'?'Изменения и предупреждения':'Changes & alerts'}</b><small>{lang==='ru'?'Перекрытия дорог, изменения остановок и отмены рейсов':'Road closures, stop changes and service cancellations'}</small><em>{lang==='ru'?'Проверить уведомления':'Check service notices'} <ArrowUpRight size={13}/></em></a><a href="https://reservasc.portosantoline.pt/pt/horarios/" target="_blank" rel="noreferrer"><span>FERRY · FUNCHAL ↔ PORTO SANTO</span><b>Porto Santo Line — {lang==='ru'?'Паромное расписание':'Ferry timetable'}</b><small>{lang==='ru'?'Отправления, бронирование и изменения рейсов':'Departures, booking and sailing changes'}</small><em>{lang==='ru'?'Проверить рейсы':'Check sailings'} <ArrowUpRight size={13}/></em></a><a href="https://www.ana.pt/en/content-topic/find-flights" target="_blank" rel="noreferrer"><span>AIR · FNC + PXO</span><b>ANA — {lang==='ru'?'Информация о рейсах':'Flight information'}</b><small>{lang==='ru'?'Вылеты и прилёты аэропортов архипелага':'Airport arrivals and departures'}</small><em>{lang==='ru'?'Проверить рейсы':'Check flights'} <ArrowUpRight size={13}/></em></a></div></section><div className="notice-card"><ShieldCheck size={22}/><div><b>{lang==='ru'?'Статус интеграции расписаний':'Timetable integration status'}</b><p>{lang==='ru'?'Официальные страницы уже доступны из MADEIRA AI. Кандидатный GTFS-архив TiiM найден, но его ZIP-файл пока не удалось проверить на структуру, актуальность и лицензию. Поэтому автоматический импорт, поиск ближайших отправлений и live-позиции автобусов не включены.':lang==='pt'?'As páginas oficiais já estão acessíveis na MADEIRA AI. O arquivo GTFS candidato da TiiM ainda não foi validado quanto à estrutura, atualidade e licença; a importação automática e partidas em tempo real não estão ativadas.':'Official pages are linked from MADEIRA AI. The candidate TiiM GTFS archive has not yet passed checks for file structure, freshness and licence, so automated imports, next-departure search and live vehicle positions remain disabled.'}</p><small><a href="https://gtfs.tiim.pt/rede-siga/rede-siga-gtfs.zip" target="_blank" rel="noreferrer">Candidate GTFS archive <ArrowUpRight size={12}/></a> · <a href="https://siga.madeira.gov.pt/faq" target="_blank" rel="noreferrer">SIGA official FAQ <ArrowUpRight size={12}/></a></small></div></div><div className="source-note">{lang==='ru'?'Для автобусных изменений ориентируйтесь на SIGA и официальных операторов. Информация может меняться в день поездки; перепроверяйте её перед отправлением.':lang==='pt'?'Para alterações nos autocarros, consulte a SIGA e os operadores oficiais. A informação pode mudar no próprio dia.':'For bus service changes, rely on SIGA and its official operators. Information may change on the day of travel; check again before departure.'}</div></section>}
-
+        {active==='transport'&&<section className="module-page">
+          <div className="module-intro"><span className="eyebrow">ARCHIPELAGO MOBILITY</span><h1>{lang==='ru'?'Транспорт на Мадейре и Порту-Санту':lang==='pt'?'Transportes na Madeira e no Porto Santo':'Transport across Madeira & Porto Santo'}</h1><p>{lang==='ru'?'Поиск остановок, прямых автобусных маршрутов и ближайших отправлений на основе опубликованного расписания SIGA.':lang==='pt'?'Pesquise paragens, percursos diretos e próximas partidas com base nos horários publicados pela SIGA.':'Search stops, direct bus routes and next departures using the published SIGA timetable.'}</p></div>
+          <section className="meta-schedule-panel transit-planner-panel">
+            <div className="meta-section-heading"><div><span className="eyebrow">GTFS · REDE SIGA</span><h2>{lang==='ru'?'Планировщик автобусов':lang==='pt'?'Planeador de autocarros':'Bus journey planner'}</h2></div><span className="meta-live-state">{transitBusy?'ЗАГРУЗКА':transitFeed?'РАСПИСАНИЕ':'ОЖИДАЕТ ДАННЫЕ'}</span></div>
+            {transitFeed&&<div className="transit-feed-meta"><span>{transitFeed.publisher_name||'Rede SIGA'}</span><span>Версия {transitFeed.feed_version}</span><span>{transitFeed.feed_start_date} — {transitFeed.feed_end_date}</span>{transitFeed.license_status==='not_provided'&&<span className="transit-provisional">Лицензия в архиве не указана</span>}</div>}
+            <div className="transit-search-grid">
+              <label><span>{lang==='ru'?'Откуда — остановка':'From — stop'}</span><input value={transitOriginQuery} onChange={e=>setTransitOriginQuery(e.target.value)} placeholder={lang==='ru'?'Например, Funchal / Marina':'e.g. Funchal / Marina'}/></label>
+              <label><span>{lang==='ru'?'Куда — остановка':'To — stop'}</span><input value={transitDestinationQuery} onChange={e=>setTransitDestinationQuery(e.target.value)} placeholder={lang==='ru'?'Например, Aeroporto':'e.g. Aeroporto'}/></label>
+            </div>
+            <div className="transit-actions"><button className="primary" onClick={searchTransitStops} disabled={transitBusy||!transitFeed}>{lang==='ru'?'Найти остановки':'Find stops'} <Search size={15}/></button><button className="ghost" onClick={findNearbyTransitStops} disabled={transitBusy||!transitFeed}><Navigation size={15}/>{lang==='ru'?'Остановки рядом со мной':'Stops near me'}</button></div>
+            {(transitOriginOptions.length>0||transitDestinationOptions.length>0)&&<div className="transit-select-grid">
+              <label><span>{lang==='ru'?'Выберите отправление':'Select origin'}</span><select value={transitOrigin?.stop_id||''} onChange={e=>setTransitOrigin(transitOriginOptions.find(x=>x.stop_id===e.target.value)||null)}><option value="">—</option>{transitOriginOptions.map(stop=><option key={stop.stop_id} value={stop.stop_id}>{stop.stop_name}</option>)}</select></label>
+              <label><span>{lang==='ru'?'Выберите назначение':'Select destination'}</span><select value={transitDestination?.stop_id||''} onChange={e=>setTransitDestination(transitDestinationOptions.find(x=>x.stop_id===e.target.value)||null)}><option value="">—</option>{transitDestinationOptions.map(stop=><option key={stop.stop_id} value={stop.stop_id}>{stop.stop_name}</option>)}</select></label>
+            </div>}
+            <div className="transit-actions"><button className="primary" onClick={searchTransitRoutes} disabled={transitBusy||!transitOrigin||!transitDestination}>{lang==='ru'?'Найти прямые рейсы':'Search direct routes'} <ArrowUpRight size={15}/></button></div>
+            {transitError&&<div className="transit-message" role="status">{transitError}</div>}
+            {transitRoutes.length>0&&<div className="transit-results"><h3>{lang==='ru'?'Найденные прямые рейсы':'Direct route results'}</h3>{transitRoutes.map((route,i)=><article className="transit-result" key={route.departure_local+'-'+i}><div className="transit-route-number">{route.route_short_name||'BUS'}</div><div><b>{route.route_long_name||route.agency_name}</b><small>{route.agency_name||'SIGA'} · {route.origin_name} → {route.destination_name}</small></div><strong>{String(route.departure_local).slice(11,16)} <span>→</span> {String(route.arrival_local).slice(11,16)}</strong></article>)}</div>}
+          </section>
+          <section className="meta-schedule-panel transit-nearby-panel"><div className="meta-section-heading"><div><span className="eyebrow">NEARBY STOPS</span><h2>{lang==='ru'?'Ближайшие остановки и отправления':'Nearby stops & departures'}</h2></div></div>
+            {transitNearbyStops.length===0?<p className="source-note">{lang==='ru'?'Разрешите геолокацию, чтобы найти остановки в радиусе 1,5 км.':'Allow location access to find stops within 1.5 km.'}</p>:<div className="transit-nearby-list">{transitNearbyStops.map(stop=><button key={stop.stop_id} className={transitSelectedStop?.stop_id===stop.stop_id?'active':''} onClick={()=>loadTransitDepartures(stop)}><b>{stop.stop_name}</b><small>{stop.distance_km.toFixed(2)} км · {stop.stop_code||stop.stop_id}</small></button>)}</div>}
+            {transitSelectedStop&&<div className="transit-results"><h3>{transitSelectedStop.stop_name}</h3>{transitDepartures.length===0&&!transitBusy?<p className="source-note">{lang==='ru'?'Нет ближайших отправлений в загруженном расписании.':'No upcoming departures in the imported timetable.'}</p>:transitDepartures.map((departure,i)=><article className="transit-result" key={departure.departure_local+'-'+i}><div className="transit-route-number">{departure.route_short_name||'BUS'}</div><div><b>{departure.route_long_name||departure.agency_name}</b><small>{departure.agency_name||'SIGA'} {departure.trip_headsign?'· '+departure.trip_headsign:''}</small></div><strong>{String(departure.departure_local).slice(11,16)}</strong></article>)}</div>}
+          </section>
+          <section className="meta-schedule-panel"><div className="meta-section-heading"><div><span className="eyebrow">OFFICIAL TRANSPORT SOURCES</span><h2>{lang==='ru'?'Официальные расписания и уведомления':'Official timetables & notices'}</h2></div><span className="meta-live-state">SIGA · OPERATOR</span></div><div className="meta-schedule-links">
+            <a href="https://siga.madeira.gov.pt/public/" target="_blank" rel="noreferrer"><span>BUS ROUTE PLANNER</span><b>SIGA — {lang==='ru'?'Планировщик поездки':'Trip planner'}</b><small>{lang==='ru'?'Официальный поиск маршрута по дате и времени':'Official route search by date and time'}</small><em>{lang==='ru'?'Построить маршрут':'Plan a route'} <ArrowUpRight size={13}/></em></a>
+            <a href="https://siga.madeira.gov.pt/horarios" target="_blank" rel="noreferrer"><span>BUS TIMETABLES</span><b>SIGA — {lang==='ru'?'Расписания автобусов':'Bus timetables'}</b><small>{lang==='ru'?'Линии и расписания трёх перевозчиков':'Routes and timetables for three operators'}</small><em>{lang==='ru'?'Открыть расписание':'Open timetables'} <ArrowUpRight size={13}/></em></a>
+            <a href="https://siga.madeira.gov.pt/avisos" target="_blank" rel="noreferrer"><span>SERVICE NOTICES</span><b>SIGA — {lang==='ru'?'Изменения и предупреждения':'Changes & alerts'}</b><small>{lang==='ru'?'Перекрытия, изменения остановок и отмены рейсов':'Road closures, stop changes and cancellations'}</small><em>{lang==='ru'?'Проверить уведомления':'Check notices'} <ArrowUpRight size={13}/></em></a>
+            <a href="https://reservasc.portosantoline.pt/pt/horarios/" target="_blank" rel="noreferrer"><span>FERRY · FUNCHAL ↔ PORTO SANTO</span><b>Porto Santo Line — {lang==='ru'?'Паромное расписание':'Ferry timetable'}</b><small>{lang==='ru'?'Отправления и бронирование':'Departures and booking'}</small><em>{lang==='ru'?'Проверить рейсы':'Check sailings'} <ArrowUpRight size={13}/></em></a>
+            <a href="https://www.ana.pt/en/content-topic/find-flights" target="_blank" rel="noreferrer"><span>AIR · FNC + PXO</span><b>ANA — {lang==='ru'?'Информация о рейсах':'Flight information'}</b><small>{lang==='ru'?'Вылеты и прилёты аэропортов':'Airport arrivals and departures'}</small><em>{lang==='ru'?'Проверить рейсы':'Check flights'} <ArrowUpRight size={13}/></em></a>
+          </div></section>
+          <div className="notice-card"><ShieldCheck size={22}/><div><b>{lang==='ru'?'Ограничения данных':'Data limitations'}</b><p>{lang==='ru'?'Используется статическое расписание GTFS, а не live-позиции автобусов. Проверяйте уведомления SIGA перед поездкой. В архиве не найден файл лицензии; импорт помечается как предварительный и остаётся в Preview до подтверждения условий повторного использования.':lang==='pt'?'É utilizado um horário GTFS estático, não posições em tempo real. Consulte os avisos SIGA antes da viagem. O arquivo não inclui licença; os dados permanecem em Preview até confirmação das condições de reutilização.':'This is a static GTFS timetable, not live bus tracking. Check SIGA notices before travel. No licence file was included; the dataset remains a provisional Preview import until reuse terms are confirmed.'}</p><small><a href="https://gtfs.tiim.pt/rede-siga/rede-siga-gtfs.zip" target="_blank" rel="noreferrer">GTFS archive <ArrowUpRight size={12}/></a> · <a href="https://siga.madeira.gov.pt/faq" target="_blank" rel="noreferrer">SIGA official FAQ <ArrowUpRight size={12}/></a></small></div></div>
+          <div className="source-note">{lang==='ru'?'Для изменений в день поездки ориентируйтесь на SIGA и официальных перевозчиков.':'For day-of-travel changes, rely on SIGA and its official operators.'}</div>
+        </section>}
         {active==='weather'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">ISLAND WEATHER</span><h1>Погода на Мадейре</h1><p>Климат на острове различается по высоте и побережью. Перед походами и поездками сверяйте прогноз и предупреждения.</p></div><div className="weather-grid"><div className="weather-main"><CloudSun size={46}/><span>IPMA · ОФИЦИАЛЬНЫЙ ИСТОЧНИК</span><h2>Прогноз по острову</h2><p>Официальные данные IPMA. Погода в горах может отличаться от побережья.</p><small className="live-stamp">{weatherData?'Получено: '+new Date(weatherData.fetchedAt).toLocaleString():'Загружаем прогноз…'}</small></div><div className="weather-links"><h3>Официальные источники</h3><a href="https://api.ipma.pt/" target="_blank" rel="noreferrer">IPMA API <ArrowUpRight size={14}/></a><a href="https://www.procivmadeira.pt/" target="_blank" rel="noreferrer">Proteção Civil Madeira <ArrowUpRight size={14}/></a></div></div>{weatherError&&<div className="source-note">IPMA временно недоступен: {weatherError}. Проверьте первоисточник.</div>}{weatherData?.warnings?.length>0&&<div className="notice-card weather-warning"><ShieldCheck size={20}/><div><b>Метеопредупреждения для Мадейры</b><p>{weatherData.warnings.map((w,i)=><span key={i}>{w.awarenessTypeName||w.awarenessType||'Предупреждение'} · {w.awarenessLevelName||w.awarenessLevelID||w.awarenessLevel||'Уровень'} </span>)}</p></div></div>}<div className="forecast-grid">{(weatherData?.locations||[]).filter(x=>x.available).map(location=><article className="forecast-card" key={location.id}><span>{location.name}</span><b>{location.days?.[0]?.maxC??'—'}° <small>/ {location.days?.[0]?.minC??'—'}°</small></b><p>{location.days?.[0]?.date||'—'} · Осадки: {location.days?.[0]?.rainProbability??'—'}%</p><small>IPMA · {location.updatedAt||'обновление не указано'}</small></article>)}</div></section>}
 
         {active==='concierge'&&<section className="module-page"><div className="module-intro"><span className="eyebrow">MADEIRA AI · CONCIERGE</span><h1>{t.concierge}</h1><p>{t.previewText}</p></div><div className="chat-panel"><div className="chat-top"><div className="ai-avatar"><Sparkles/></div><div><b>MADEIRA AI</b><small>Island assistant · Server API</small></div><span className="preview-pill">API</span></div><div className="chat-messages">{chat.length===0&&<div className="welcome-message"><Sparkles size={25}/><h3>Чем помочь на Мадейре?</h3><p>Спросите о районах, маршрутах, недвижимости или идеях для поездки.</p><div className="suggestions">{['Что посмотреть за 3 дня?','Где искать участок для виллы?','Как подготовиться к походу?'].map(q=><button key={q} onClick={()=>setMessage(q)}>{q}<ArrowUpRight size={13}/></button>)}</div></div>}{chat.map((m,i)=><div className={'chat-bubble '+m.role} key={i}><div>{m.text}</div>{m.role==='assistant'&&m.sources?.length>0&&<div className="chat-sources"><small>ИСТОЧНИКИ · {m.searchedAt?new Date(m.searchedAt).toLocaleString(lang==='ru'?'ru-RU':lang==='pt'?'pt-PT':'en-GB'):''}</small>{m.sources.map((source,j)=><a key={source.url||j} href={source.url} target="_blank" rel="noopener noreferrer">{source.title}<ArrowUpRight size={12}/></a>)}</div>}</div>)}</div><form className="chat-form" onSubmit={sendChat}><input value={message} onChange={e=>setMessage(e.target.value)} placeholder={t.askPlaceholder}/><button className="primary" type="submit" disabled={assistantBusy}><Send size={16}/>{assistantBusy?'…':t.send}</button></form><div className="chat-disclaimer">{assistantBusy?'MADEIRA AI формирует ответ…':'AI-ответы доступны через серверный API. Данные IPMA и официальные источники указаны отдельно.'}</div></div></section>}
