@@ -59,6 +59,9 @@ async function main() {
   if(!dryRun && (!supabaseUrl || !serviceKey)) {
     throw new Error("Missing SUPABASE_URL/VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in madeira-ai/.env.local. Never paste the secret key into chat.");
   }
+  if(!dryRun && !supabaseUrl.includes("naapknymotgauzgqurfy.supabase.co")) {
+    throw new Error("Safety stop: GTFS importer writes only to the isolated Supabase Preview project (naapknymotgauzgqurfy). Production is not permitted.");
+  }
   console.log("Downloading Rede SIGA GTFS feed…");
   const localArchive=process.env.GTFS_ARCHIVE_PATH;
   const response=localArchive?null:await fetch(FEED_URL,{headers:{"User-Agent":"MADEIRA-AI-GTFS-import/1.0"}});
