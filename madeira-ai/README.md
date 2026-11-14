@@ -30,7 +30,7 @@ Without Supabase environment values, the app runs in guest/demo mode. Cloud auth
 
 ## Deploy to Vercel
 
-Import the repository and set **Root Directory** to `madeira-ai`. Vercel will detect Vite; use `npm run build` and `dist` as the output directory. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables. Add `OPENAI_API_KEY` as a server-only environment variable (do not prefix it with `VITE_`). Optionally set `OPENAI_MODEL` (default `gpt-4.1-mini`).
+Import the repository and set **Root Directory** to `madeira-ai`. Vercel will detect Vite; use `npm run build` and `dist` as the output directory. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, or the public Vercel variables `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. The Vite config exposes only `VITE_` and `NEXT_PUBLIC_` variables to browser code; never expose service-role or secret keys. Add `OPENAI_API_KEY` as a server-only environment variable (do not prefix it with `VITE_`). Optionally set `OPENAI_MODEL` (default `gpt-4.1-mini`).
 
 ## Honest MVP boundaries
 
