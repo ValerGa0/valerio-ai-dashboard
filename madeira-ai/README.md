@@ -25,7 +25,7 @@ An independent, responsive island platform for travellers, residents, property s
 - Healthcare additions include SESARAM hospital/health-centre references, urgent-care contacts for eight municipalities, Funchal Bom Jesus and the official pharmacy locator. Hospital entries were already present.
 - Public-service additions include SIMplifica, ARM water/waste services, EEM electricity, IEM employment and citizen-facing services.
 - Economy additions include Invest Madeira, IDE, Madeira Parques Empresariais, GESBA, CARAM, ACIF-CCIM and Startup Madeira, plus five company-sourced profiles: Bordal, Henriques & Henriques, Vinhos Barbeito, Madeira Wine Company and Blandy’s Wine Lodge.
-- Transport additions include SIGA public transport operators, Porto Santo Line ferry and ANA airports in Madeira and Porto Santo.
+- Transport additions include SIGA public transport operators, Porto Santo Line ferry and ANA airports in Madeira and Porto Santo. The interface links directly to SIGA route timetables and service alerts, the Porto Santo Line timetable, and ANA flight status. A TiiM-hosted Rede SIGA GTFS feed endpoint has been identified and exposed as a candidate source; automated ingestion and validation are not yet implemented.
 - Private, authenticated community-needs submission workflow with consent and moderation; raw submissions are not public.
 - Authenticated AI opportunity-analysis endpoint using official database evidence plus live web research, limited to 3 runs per user per hour.
 
@@ -33,7 +33,7 @@ An independent, responsive island platform for travellers, residents, property s
 
 The current Preview database contains 254 active directory entries across all 11 municipalities and 56 active source records. Entries marked `source_listed` are present in an official/operator source; this does not independently guarantee current opening status, service availability or contact accuracy. The new health, public-service, economy and transport additions are source-listed and require direct operational verification where applicable.
 
-Transport timetables, ferry departures, airport operations, pharmacy duty rosters and health-centre service hours are dynamic. The platform links to primary sources; do not treat static catalogue text as live availability. The pharmacy locator is linked as an official search service rather than pretending that a static list is a real-time pharmacy database.
+Transport timetables, ferry departures, airport operations, pharmacy duty rosters and health-centre service hours are dynamic. The GTFS feed endpoint shown in the UI is a candidate discovered through the MobilityData feed catalogue and must be validated against TiiM before automated ingestion or redistribution. The platform links to primary sources; do not treat static catalogue text as live availability. The pharmacy locator is linked as an official search service rather than pretending that a static list is a real-time pharmacy database.
 
 The directory is not a complete island-wide business census. The 40 indicators are aggregate indicators, not parcel-level or company-level records. No parcel-level buildability determinations or confirmed public land listings have been imported yet. Raw community submissions remain private until moderation. The AI concierge and opportunity analysis require `OPENAI_API_KEY` in the Vercel server environment. Never put an OpenAI secret key in browser code.
 
