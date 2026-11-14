@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { resolve } from "node:path";
+import { readFile } from "node:fs/promises";
 import { config } from "dotenv";
 import JSZip from "jszip";
 import { parse as parseStream } from "csv-parse";
@@ -59,9 +60,10 @@ async function main() {
     throw new Error("Missing SUPABASE_URL/VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in madeira-ai/.env.local. Never paste the secret key into chat.");
   }
   console.log("Downloading Rede SIGA GTFS feed…");
-  const response=await fetch(FEED_URL,{headers:{"User-Agent":"MADEIRA-AI-GTFS-import/1.0"}});
-  if(!response.ok)throw new Error(`GTFS download failed: HTTP ${response.status}`);
-  const archive=Buffer.from(await response.arrayBuffer());
+  const localArchive=process.env.GTFS_ARCHIVE_PATH;
+  const response=localArchive?null:await fetch(FEED_URL,{headers:{"User-Agent":"MADEIRA-AI-GTFS-import/1.0"}});
+  if(response&&!response.ok)throw new Error(`GTFS download failed: HTTP ${response.status}`);
+  const archive=localArchive?await readFile(resolve(process.cwd(),localArchive)):Buffer.from(await response.arrayBuffer());
   console.log(`  ZIP size: ${(archive.length/1024/1024).toFixed(1)} MB`);
   const zip=await JSZip.loadAsync(archive);
   for(const name of ["agency.txt","routes.txt","stops.txt","trips.txt","stop_times.txt","calendar_dates.txt","feed_info.txt"])requiredFile(zip,name);
@@ -80,7 +82,7 @@ async function main() {
   console.log("Rows:",counts);
   if(dryRun){console.log("Dry run complete. No database changes made.");return;}
   const db=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
-  const modified=response.headers.get("last-modified");
+  const modified=response?.headers.get("last-modified")||null;
   const {data:feed,error:feedError}=await db.from("transit_feeds").upsert({
     source_url:FEED_URL,publisher_name:feedInfo.feed_publisher_name||"Rede SIGA",
     publisher_url:feedInfo.feed_publisher_url||SOURCE_PUBLISHER_URL,
