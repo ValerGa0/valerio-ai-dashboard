@@ -340,7 +340,7 @@ function App(){
 
   const renderHeader=()=> <header className="topbar">
     <button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)} aria-label="Menu"><Menu size={20}/></button>
-    <div className="crumb"><span>MADEIRA AI</span><i>/</i>{t.nav[['overview','meta','explore','property','travel','invest','transport','weather','concierge'].indexOf(active)]}</div>
+    <div className="crumb"><span>META MADEIRA</span><i>/</i>{t.nav[['overview','meta','explore','property','travel','invest','transport','weather','concierge'].indexOf(active)]}</div>
     <div className="top-actions">
       <label className="searchbox"><Search size={16}/><input value={query} onChange={e=>{setQuery(e.target.value);if(active==='overview')setActive('explore');}} placeholder={t.search}/><kbd>⌘ K</kbd></label>
       <select className="language" value={lang} onChange={e=>setLang(e.target.value)} aria-label="Language"><option value="ru">RU</option><option value="en">EN</option><option value="pt">PT</option></select>
@@ -355,7 +355,7 @@ function App(){
 
   return <div className="app-shell">
     <aside className={'sidebar '+(mobileOpen?'open':'')}>
-      <div className="brand"><div className="brand-mark"><Compass size={23}/></div><div><b>MADEIRA AI</b><small>ISLAND INTELLIGENCE</small></div><button className="close-menu" onClick={()=>setMobileOpen(false)}><X size={18}/></button></div>
+      <div className="brand"><div className="brand-mark"><Compass size={23}/></div><div><b>META MADEIRA</b><small>ISLAND INTELLIGENCE</small></div><button className="close-menu" onClick={()=>setMobileOpen(false)}><X size={18}/></button></div>
       <div className="side-label">DISCOVER</div>
       <nav>{['overview','meta','explore','property','travel','invest','transport','weather','concierge'].map((id,i)=>{
         const icons=[Map,Globe2,Compass,Building2,Plane,BriefcaseBusiness,CarFront,CloudSun,MessageCircle];const Icon=icons[i];
@@ -372,7 +372,7 @@ function App(){
       <div className="page-content">
         {active==='overview'&&<section>
           <div className="dashboard-welcome">
-            <div className="dashboard-welcome-copy"><span className="eyebrow"><span/> MADEIRA · ATLANTIC ISLAND</span><h1>MADEIRA AI</h1><p>{t.intro}</p><div className="dashboard-welcome-actions"><button className="primary" onClick={()=>openSection('explore')}>{t.explore}<ArrowUpRight size={16}/></button><button className="ghost" onClick={()=>openSection('concierge')}><Sparkles size={16}/>{t.ask}</button></div></div>
+            <div className="dashboard-welcome-copy"><span className="eyebrow"><span/> MADEIRA · ATLANTIC ISLAND</span><h1>META MADEIRA</h1><p>{t.intro}</p><div className="dashboard-welcome-actions"><button className="primary" onClick={()=>openSection('explore')}>{t.explore}<ArrowUpRight size={16}/></button><button className="ghost" onClick={()=>openSection('concierge')}><Sparkles size={16}/>{t.ask}</button></div></div>
             <div className="dashboard-coast-art"><div className="coast-sun"/><div className="coast-cliff"/><div className="coast-sea"/><span>ATLANTIC · PORTUGAL</span></div>
           </div>
           <div className="location-weather-card">
