@@ -3,10 +3,10 @@
 insert into public.island_sources
 (id,name,category,publisher,url,authority,scope,update_note,last_checked_at,is_active)
 values
-('bordal-company','Bordal — Bordados da Madeira','economy','Bordal','https://www.bordal.pt/','company','Funchal','Company website publishes its Funchal shop/factory address and contact details.',now(),true),
-('hh-company','Henriques & Henriques — company contacts','economy','Henriques & Henriques','https://henriquesehenriques.pt/contactos-e-emails/','company','Câmara de Lobos','Company website publishes its Câmara de Lobos commercial premises and telephone.',now(),true),
-('barbeito-company','Vinhos Barbeito — company contacts','economy','Vinhos Barbeito','https://www.vinhosbarbeito.com/en/contacts.html','company','Câmara de Lobos','Company website publishes its Câmara de Lobos industrial-park address and telephone.',now(),true),
-('mwc-company','Madeira Wine Company — contacts and facilities','economy','Madeira Wine Company','https://www.madeirawinecompany.com/en/contacts.html','company','Santa Cruz / Funchal','Company website publishes winery address in Caniçal and Blandy’s Wine Lodge contact in Funchal.',now(),true)
+('bordal-company','Bordal — Bordados da Madeira','economy','Bordal','https://www.bordal.pt/','official','Funchal','Company website publishes its Funchal shop/factory address and contact details.',now(),true),
+('hh-company','Henriques & Henriques — company contacts','economy','Henriques & Henriques','https://henriquesehenriques.pt/contactos-e-emails/','official','Câmara de Lobos','Company website publishes its Câmara de Lobos commercial premises and telephone.',now(),true),
+('barbeito-company','Vinhos Barbeito — company contacts','economy','Vinhos Barbeito','https://www.vinhosbarbeito.com/en/contacts.html','official','Câmara de Lobos','Company website publishes its Câmara de Lobos industrial-park address and telephone.',now(),true),
+('mwc-company','Madeira Wine Company — contacts and facilities','economy','Madeira Wine Company','https://www.madeirawinecompany.com/en/contacts.html','official','Santa Cruz / Funchal','Company website publishes winery address in Caniçal and Blandy’s Wine Lodge contact in Funchal.',now(),true)
 on conflict (id) do update set name=excluded.name,category=excluded.category,publisher=excluded.publisher,url=excluded.url,authority=excluded.authority,scope=excluded.scope,update_note=excluded.update_note,last_checked_at=now(),is_active=true;
 
 insert into public.island_directory_entries
