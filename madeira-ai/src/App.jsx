@@ -251,7 +251,7 @@ function App(){
           : await supabase.from('saved_places').upsert({user_id:user.id,place_id:id},{onConflict:'user_id,place_id'});
         if(result.error) throw result.error;
       }catch(error){
-        setSaved(saved.filter(x=>wasSaved?x!==id:x!==id));
+        setSaved(saved);
         setSavedError(error.message||'Не удалось сохранить место в облаке.');
       }
     }
