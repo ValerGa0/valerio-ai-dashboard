@@ -1,15 +1,15 @@
-# META MADEIRA
+# MADEIRA AI
 
 An independent, responsive island platform for travellers, residents, property seekers and investors.
 
-**Product name:** META MADEIRA
-**AI engine:** MADEIRA AI  
+**Product name:** MADEIRA AI
+**AI engine:** AI concierge  
 **Creator credit:** Created by VALÉRIO
 
 ## Included in this first MVP
 
 - Responsive desktop and mobile web app shell.
-- META MADEIRA island-intelligence workspace covering all 10 Madeira municipalities and Porto Santo, backed by a central Supabase data model for sources, directory entries, needs and opportunities.
+- MADEIRA AI archipelago-intelligence workspace covering all 10 Madeira municipalities and Porto Santo, backed by a central Supabase data model for sources, directory entries, needs and opportunities.
 - Official-source register with provenance notes and verification statuses; public data tables are read-only under Row Level Security.
 - Russian, English and Portuguese interface labels.
 - Explore section with Madeira points of interest and an OpenStreetMap embed.
@@ -37,7 +37,7 @@ Import the repository and set **Root Directory** to `madeira-ai`. Vercel will de
 
 ## Honest MVP boundaries
 
-This version now reads daily weather forecasts from the official IPMA open-data API and links to official trail and territorial-planning sources. It does not yet provide a complete island-wide business census, live property listings, verified booking inventory, trail-booking inventory, payments, or a continuously monitored investment feed. META MADEIRA starts with the 11-municipality structure and official source register; directory coverage and needs/opportunities must be populated and validated municipality by municipality. The AI concierge requires `OPENAI_API_KEY` to be configured in the Vercel server environment. Never put an OpenAI secret key in browser code.
+This version now reads daily weather forecasts from the official IPMA open-data API and links to official trail and territorial-planning sources. It does not yet provide a complete island-wide business census, live property listings, verified booking inventory, trail-booking inventory, payments, or a continuously monitored investment feed. MADEIRA AI starts with the 11-municipality structure and official source register; directory coverage and needs/opportunities must be populated and validated municipality by municipality. The AI concierge requires `OPENAI_API_KEY` to be configured in the Vercel server environment. Never put an OpenAI secret key in browser code.
 
 ## Next implementation milestones
 
