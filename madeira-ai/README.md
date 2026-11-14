@@ -8,6 +8,8 @@ An independent, responsive island platform for travellers, residents, property s
 ## Included in this first MVP
 
 - Responsive desktop and mobile web app shell.
+- META MADEIRA island-intelligence workspace covering all 10 Madeira municipalities and Porto Santo, backed by a central Supabase data model for sources, directory entries, needs and opportunities.
+- Official-source register with provenance notes and verification statuses; public data tables are read-only under Row Level Security.
 - Russian, English and Portuguese interface labels.
 - Explore section with Madeira points of interest and an OpenStreetMap embed.
 - Real-estate area guide and a property due-diligence checklist.
@@ -23,7 +25,7 @@ An independent, responsive island platform for travellers, residents, property s
 1. Open this folder as the Vite project root.
 2. Install dependencies: `npm install`
 3. Copy `.env.example` to `.env.local` and enter the Supabase project URL and publishable/anon key.
-4. Apply `supabase/migrations/202611130001_madeira_ai.sql` in the Supabase SQL Editor.
+4. Apply `supabase/migrations/202611130001_madeira_ai.sql` and `supabase/migrations/202611140002_meta_madeira_island_intelligence.sql` in the Supabase SQL Editor.
 5. Start: `npm run dev`
 
 Without Supabase environment values, the app runs in guest/demo mode. Cloud authentication and cloud saved places require the migration and environment values.
@@ -34,7 +36,7 @@ Import the repository and set **Root Directory** to `madeira-ai`. Vercel will de
 
 ## Honest MVP boundaries
 
-This version now reads daily weather forecasts from the official IPMA open-data API and links to official trail and territorial-planning sources. It does not provide live property listings, verified booking inventory, trail-booking inventory, payments, or a full continuously monitored investment feed. The AI concierge requires `OPENAI_API_KEY` to be configured in the Vercel server environment. Never put an OpenAI secret key in browser code.
+This version now reads daily weather forecasts from the official IPMA open-data API and links to official trail and territorial-planning sources. It does not yet provide a complete island-wide business census, live property listings, verified booking inventory, trail-booking inventory, payments, or a continuously monitored investment feed. META MADEIRA starts with the 11-municipality structure and official source register; directory coverage and needs/opportunities must be populated and validated municipality by municipality. The AI concierge requires `OPENAI_API_KEY` to be configured in the Vercel server environment. Never put an OpenAI secret key in browser code.
 
 ## Next implementation milestones
 
