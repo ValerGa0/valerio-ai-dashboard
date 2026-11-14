@@ -24,13 +24,14 @@ An independent, responsive island platform for travellers, residents, property s
 - Archipelago source register covering municipal portals, municipal business directories, PRIT and DREM business/construction/housing statistics.
 - Property and planning data model for municipal plans and public land opportunities, plus 26 official regional/municipal business and construction indicators.
 - Private, authenticated community-needs submission workflow with consent and moderation; raw submissions are not public.
+- Authenticated AI opportunity-analysis endpoint using official database evidence plus live web research, limited to 3 runs per user per hour.
 
 ## Run locally
 
 1. Open this folder as the Vite project root.
 2. Install dependencies: `npm install`
 3. Copy `.env.example` to `.env.local` and enter the Supabase project URL and publishable/anon key.
-4. Apply the migrations in order: `202611130001_madeira_ai.sql`, `202611140002_meta_madeira_island_intelligence.sql`, `202611140003_meta_madeira_foreign_key_indexes.sql`, `202611140004_import_porto_moniz_directory.sql`, `202611140005_archipelago_sources.sql`, `202611140006_property_construction_data.sql`, and `202611140007_private_need_submissions.sql`.
+4. Apply the migrations in order: `202611130001_madeira_ai.sql`, `202611140002_meta_madeira_island_intelligence.sql`, `202611140003_meta_madeira_foreign_key_indexes.sql`, `202611140004_import_porto_moniz_directory.sql`, `202611140005_archipelago_sources.sql`, `202611140006_property_construction_data.sql`, and `202611140007_private_need_submissions.sql`, and `202611140008_ai_analysis_usage_limit.sql`.
 5. Start: `npm run dev`
 
 Without Supabase environment values, the app runs in guest/demo mode. Cloud authentication and cloud saved places require the migration and environment values.
@@ -50,5 +51,5 @@ This version now reads daily weather forecasts from the official IPMA open-data 
 3. Add verified property and business listings with source links and timestamps.
 4. Add live trail-status ingestion and booking-provider integrations where permitted.
 5. Populate and validate directory entries across all 11 municipalities; import official PDM/land-bank records and municipality-level construction statistics.
-6. Review private community submissions, publish only anonymised validated needs, and connect the curated evidence to AI opportunity analysis.
+7. Review private community submissions, publish only anonymised validated needs, and continue improving the AI opportunity analysis.
 6. Add booking/partner workflows and production mobile packaging.
