@@ -30,7 +30,7 @@ export default async function handler(req, res) {
         .then(async response => response.ok ? response.json() : [])
         .catch(() => [])
     ]);
-    const warnings = Array.isArray(rawWarnings) ? rawWarnings.filter(w => String(w.idAreaAviso || "").toUpperCase() === "MCS") : [];
+    const warnings = Array.isArray(rawWarnings) ? rawWarnings.filter(w => String(w.idAreaAviso || "").toUpperCase() === "MCS" && ["yellow", "orange", "red"].includes(String(w.awarenessLevelID || "").toLowerCase())) : [];
     res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate=3600");
     return res.status(200).json({
       provider: "IPMA", fetchedAt: new Date().toISOString(), sourceUrl: "https://api.ipma.pt/",
