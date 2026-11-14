@@ -157,3 +157,52 @@
 .region-folder-copy em{font-style:normal;font-size:11px;color:#9fb4ad}
 .region-folder-count{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:1px;color:#d8c18d;white-space:nowrap}
 @media(max-width:600px){.region-folder{gap:11px;padding:14px}.region-folder-icon{flex-basis:44px;height:44px}.region-folder-copy b{font-size:18px}.region-folder-copy em{font-size:10px}.region-folder-count{font-size:0}.region-folder-count svg{width:19px;height:19px}}
+
+
+/* META MADEIRA — island intelligence workspace */
+.meta-page{max-width:1320px}
+.meta-page>.module-intro{margin-bottom:22px}
+.meta-page>.module-intro h1{letter-spacing:.02em}
+.meta-stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:18px 0 30px}
+.meta-stats-grid article{display:grid;gap:7px;padding:16px;border:1px solid #29483f;border-radius:13px;background:linear-gradient(145deg,#112d2b,#0b1e20)}
+.meta-stats-grid span{color:#a4b7aa;font-size:10px}
+.meta-stats-grid b{color:#e5d09b;font:800 29px/1 Manrope}
+.meta-stats-grid small{color:#789087;font-size:9px;line-height:1.45}
+.meta-section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:27px 0 13px}
+.meta-section-heading h2{margin:6px 0 0;color:#edf0e8;font:750 21px Manrope}
+.meta-live-state,.meta-count{padding:6px 9px;border:1px solid #4a5a43;border-radius:20px;color:#d6c18d;background:#1a2d27;font-size:8px;letter-spacing:.1em;white-space:nowrap}
+.meta-error{margin:12px 0;padding:11px 13px;border:1px solid #795b4d;border-radius:10px;color:#e8b8a6;background:#3a2822;font-size:10px}
+.meta-municipality-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.meta-municipality{display:grid;gap:7px;min-width:0;padding:14px;text-align:left;border:1px solid #2c4940;border-radius:12px;background:linear-gradient(145deg,#122b28,#0b1d1f);color:#e7eee6;cursor:pointer;transition:.18s}
+.meta-municipality:hover,.meta-municipality.active{border-color:#c5ad77;background:linear-gradient(145deg,#1d3930,#142b29);transform:translateY(-1px)}
+.meta-municipality>span{color:#d5bd86;font-size:8px;letter-spacing:.13em}
+.meta-municipality>b{font:700 13px Manrope;overflow-wrap:anywhere}
+.meta-municipality>small{color:#8fa397;font-size:9px}
+.meta-filter-row{display:flex;gap:7px;overflow-x:auto;padding:2px 0 11px;scrollbar-width:thin}
+.meta-filter-row button{flex:none;padding:8px 11px;border:1px solid #344c42;border-radius:99px;background:#122520;color:#a8b9ae;font-size:9px;cursor:pointer}
+.meta-filter-row button.active{background:#d8c18b;border-color:#d8c18b;color:#172720}
+.meta-empty{display:grid;justify-items:center;gap:9px;padding:28px 22px;border:1px dashed #3b5a4e;border-radius:14px;background:#0e211f;text-align:center;color:#d9e3d8}
+.meta-empty svg{color:#d6bf88}
+.meta-empty b{font:700 14px Manrope}
+.meta-empty p{max-width:690px;margin:0;color:#91a69a;font-size:10px;line-height:1.7}
+.meta-empty.compact{min-height:120px;align-content:center;padding:18px}
+.meta-directory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.meta-directory-card,.meta-signal-card{display:grid;gap:8px;padding:14px;border:1px solid #2a473e;border-radius:11px;background:#102320}
+.meta-directory-card>span,.meta-signal-card small{color:#d3bd87;font-size:8px;letter-spacing:.08em;text-transform:uppercase}
+.meta-directory-card>b,.meta-signal-card>b{color:#e9eee5;font:700 13px Manrope}
+.meta-directory-card p,.meta-signal-card p{margin:0;color:#9bafa2;font-size:10px;line-height:1.55}
+.meta-directory-card>small{color:#7f988b;font-size:8px}
+.meta-directory-card>a{color:#d8c18b;text-decoration:none;font-size:9px}
+.meta-two-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+.meta-two-columns>section{min-width:0}
+.meta-signal-card{margin-bottom:8px}
+.meta-signal-card.opportunity{border-color:#5a5035;background:linear-gradient(135deg,#292b20,#14251f)}
+.meta-source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.meta-source-grid>a{display:grid;align-content:start;gap:7px;padding:13px;border:1px solid #2b453e;border-radius:10px;background:#102320;text-decoration:none}
+.meta-source-grid>a>span{color:#d8c18b;font-size:8px;text-transform:uppercase;letter-spacing:.1em}
+.meta-source-grid>a>b{color:#e6ece4;font:700 11px Manrope}
+.meta-source-grid>a>small{color:#8ea397;font-size:9px;line-height:1.5}
+.meta-source-grid>a:hover{border-color:#bca66f}
+.meta-disclaimer{margin:17px 0 4px;padding:12px 14px;border-left:2px solid #bda775;background:#17251f;color:#94a69a;font-size:9px;line-height:1.6}
+@media(max-width:900px){.meta-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.meta-municipality-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.meta-directory-grid,.meta-source-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.meta-section-heading{align-items:flex-start}.meta-section-heading h2{font-size:18px}.meta-municipality-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.meta-two-columns{grid-template-columns:1fr;gap:4px}.meta-directory-grid,.meta-source-grid{grid-template-columns:1fr}.meta-stats-grid article{padding:13px}.meta-stats-grid b{font-size:25px}}
