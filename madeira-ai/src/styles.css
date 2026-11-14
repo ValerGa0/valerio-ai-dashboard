@@ -157,16 +157,3 @@
 .region-folder-copy em{font-style:normal;font-size:11px;color:#9fb4ad}
 .region-folder-count{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:1px;color:#d8c18d;white-space:nowrap}
 @media(max-width:600px){.region-folder{gap:11px;padding:14px}.region-folder-icon{flex-basis:44px;height:44px}.region-folder-copy b{font-size:18px}.region-folder-copy em{font-size:10px}.region-folder-count{font-size:0}.region-folder-count svg{width:19px;height:19px}}
-
-
-/* Cloud enquiry and persistence feedback */
-.inquiry-panel{display:grid;gap:13px;margin-top:22px;padding:20px;border:1px solid #344b40;border-radius:14px;background:linear-gradient(145deg,#142b27,#10201f)}
-.inquiry-panel>div:first-child h2{margin:7px 0;color:#edf0e8;font:700 20px Manrope}
-.inquiry-panel>div:first-child p{max-width:620px;margin:0;color:#9fb0a5;font-size:11px;line-height:1.6}
-.inquiry-panel label{display:grid;gap:6px;color:#c7d1c8;font-size:10px}
-.inquiry-panel input,.inquiry-panel select,.inquiry-panel textarea{width:100%;min-width:0;padding:11px 12px;border:1px solid #365147;border-radius:9px;background:#0b1d1b;color:#edf0e8;font:inherit;font-size:12px}
-.inquiry-panel textarea{resize:vertical;line-height:1.5}
-.inquiry-panel .primary{justify-self:start}
-.inquiry-status,.inline-error{color:#e6c58f;font-size:10px;line-height:1.5}
-.inline-error{display:block;margin-top:7px}
-@media(max-width:600px){.inquiry-panel{padding:15px}.inquiry-panel .primary{width:100%;justify-content:center}}
