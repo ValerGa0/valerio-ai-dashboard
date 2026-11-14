@@ -228,3 +228,20 @@
 .need-error{border:1px solid #795b4d;background:#3a2822;color:#e8b8a6}
 .need-privacy-note{display:block;margin-top:12px;color:#758e82;font-size:9px;line-height:1.6}
 @media(max-width:620px){.need-submission-panel{padding:15px}.need-form-grid{grid-template-columns:1fr}.need-form-grid label.wide{grid-column:auto}.need-signin-note{align-items:flex-start;flex-direction:column}}
+
+
+/* Evidence-led AI opportunity analysis */
+.meta-analysis-panel{margin:26px 0;padding:20px;border:1px solid #6a5c3c;border-radius:15px;background:linear-gradient(145deg,#1a3029,#102321 68%,#172721)}
+.meta-analysis-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.meta-analysis-heading h2{margin:7px 0;color:#f0eee4;font:750 21px Manrope}
+.meta-analysis-heading p{max-width:800px;margin:0;color:#a7b8aa;font-size:10px;line-height:1.65}
+.meta-analysis-heading .primary{flex:none;display:flex;align-items:center;gap:8px}
+.analysis-limit-note{margin-top:12px;color:#81988b;font-size:9px;line-height:1.6}
+.analysis-result{margin-top:16px;padding:16px;border:1px solid #3a5748;border-radius:11px;background:#0c1d1f}
+.analysis-result>small{display:block;margin-bottom:12px;color:#d7c18e;font-size:9px}
+.analysis-answer{color:#dbe4db;font-size:11px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere}
+.analysis-source-links{display:grid;gap:7px;margin-top:15px;padding-top:12px;border-top:1px solid #2d493f}
+.analysis-source-links b{color:#d6c18d;font:700 10px Manrope}
+.analysis-source-links a{color:#a9c7b7;font-size:9px;text-decoration:none}
+.analysis-source-links a:hover{color:#e2d09e}
+@media(max-width:700px){.meta-analysis-panel{padding:15px}.meta-analysis-heading{flex-direction:column}.meta-analysis-heading h2{font-size:18px}.meta-analysis-heading .primary{width:100%;justify-content:center}}
