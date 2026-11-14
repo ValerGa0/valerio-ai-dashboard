@@ -47,8 +47,8 @@ function loadLeaflet(){
       const link=document.createElement('link');link.rel='stylesheet';link.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';link.dataset.madeiraLeaflet='1';document.head.appendChild(link);
     }
     const script=document.createElement('script');script.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';script.async=true;
-    script.onload=()=>window.L?resolve(window.L):reject(new Error('Leaflet unavailable'));
-    script.onerror=()=>reject(new Error('Map library could not be loaded'));
+    script.onload=()=>{if(window.L)resolve(window.L);else{window.__madeiraLeafletPromise=null;reject(new Error('Leaflet unavailable'));}};
+    script.onerror=()=>{window.__madeiraLeafletPromise=null;reject(new Error('Map library could not be loaded'));};
     document.head.appendChild(script);
   });
   return window.__madeiraLeafletPromise;
