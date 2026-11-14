@@ -60,3 +60,16 @@ Import the repository and set **Root Directory** to `madeira-ai`. Vercel will de
 5. Expand verified local enterprise listings by municipality and sector; company website records remain source-listed until operationally reconfirmed.\n6. Identify real public land-bank, auction and lease offers; never infer a listing from zoning plans.
 7. Review private resident/visitor submissions and publish only anonymised, evidence-backed needs.
 8. Improve AI opportunity analysis as the evidence base grows, with explicit confidence and due-diligence steps.
+
+## GTFS bus timetable import (Preview only)
+
+The Rede SIGA feed importer runs locally so the 440k+ stop-time rows are streamed in batches rather than processed inside a resource-limited Edge Function.
+
+1. Copy `.env.example` to `.env.local` inside `madeira-ai/`.
+2. Keep the existing `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values.
+3. In Supabase **Preview** project settings, open **API Keys** and copy the server-side **Secret key** (formerly service-role key) into `SUPABASE_SERVICE_ROLE_KEY`. Do not use a `VITE_` prefix and never share this key.
+4. From the `madeira-ai/` directory run `npm run import:gtfs`.
+
+The script downloads the current GTFS ZIP, imports agencies, routes, stops, trips, service dates and stop times in resumable upsert batches, and marks the feed ready only after all rows are written. It never prints the secret key. The archive currently has no bundled licence file; the feed is tagged `license_status=not_provided` and remains in Preview pending reuse-rights confirmation.
+
+For a read-only archive check without database writes, run `npm run import:gtfs -- --dry-run`.
