@@ -20,7 +20,7 @@ An independent, responsive island platform for travellers, residents, property s
 - Server-side AI concierge endpoint (`/api/concierge`) using an OpenAI API key stored only in Vercel environment variables.
 - Live IPMA daily forecast endpoint (`/api/weather`) for Funchal and Porto Santo, plus official source directory (`/api/sources`).
 - Official Madeira source links for IFCN trail status, Visit Madeira, PRIT municipal plans and IRIG geospatial data.
-- Initial shared directory import: 64 records across Porto Moniz (29) and Machico (35) (17 municipal restaurant listings plus accommodation, transport, activity, retail and service leads), with verification status and source provenance.
+- Initial shared directory import: 98 records across Porto Moniz (29), Machico (35), Calheta (28) and Ponta do Sol (6) (17 municipal restaurant listings plus accommodation, transport, activity, retail and service leads), with verification status and source provenance.
 - Archipelago source register covering municipal portals, municipal business directories, PRIT and DREM business/construction/housing statistics.
 - Property and planning data model for municipal plans and public land opportunities, plus 40 official regional/municipal business and construction indicators.
 - Private, authenticated community-needs submission workflow with consent and moderation; raw submissions are not public.
@@ -31,7 +31,7 @@ An independent, responsive island platform for travellers, residents, property s
 1. Open this folder as the Vite project root.
 2. Install dependencies: `npm install`
 3. Copy `.env.example` to `.env.local` and enter the Supabase project URL and publishable/anon key.
-4. Apply these migrations in order: `202611130001_madeira_ai.sql`, `202611140002_meta_madeira_island_intelligence.sql`, `202611140003_meta_madeira_foreign_key_indexes.sql`, `202611140004_import_porto_moniz_directory.sql`, `202611140005_archipelago_sources.sql`, `202611140006_property_construction_data.sql`, `202611140007_private_need_submissions.sql`, `202611140008_ai_analysis_usage_limit.sql`, `202611140009_import_machico_directory.sql`, `202611140010_refine_official_indicators.sql`, `202611140011_archipelago_fk_indexes.sql`.
+4. Apply these migrations in order: `202611130001_madeira_ai.sql`, `202611140002_meta_madeira_island_intelligence.sql`, `202611140003_meta_madeira_foreign_key_indexes.sql`, `202611140004_import_porto_moniz_directory.sql`, `202611140005_archipelago_sources.sql`, `202611140006_property_construction_data.sql`, `202611140007_private_need_submissions.sql`, `202611140008_ai_analysis_usage_limit.sql`, `202611140009_import_machico_directory.sql`, `202611140010_refine_official_indicators.sql`, `202611140011_archipelago_fk_indexes.sql`, `202611140012_import_calheta_ponta_do_sol_tourism.sql`, and `202611140013_import_calheta_ponta_pdm.sql`.
 5. Start: `npm run dev`
 
 Without Supabase environment values, the app runs in guest/demo mode. Cloud authentication and cloud saved places require the migration and environment values.
@@ -46,8 +46,8 @@ Preview currently contains 29 Porto Moniz directory records, 34 source records a
 
 ## Next implementation milestones
 
-1. Build verified business and service directories across the remaining 10 municipalities and Porto Santo.
-2. Import current municipal PDM documents, land-bank offers and public property records with source dates and verification status.
+1. Build verified business and service directories across the remaining 8 municipalities and Porto Santo; expand the first-pass catalogues in Machico, Calheta and Ponta do Sol.
+2. Import current municipal PDM documents, land-bank offers and public property records for the remaining municipalities, with source dates and verification status.
 3. Add municipality-level housing, construction and property indicators wherever DREM publishes them.
 4. Review private resident/visitor submissions and publish only anonymised, evidence-backed needs.
 5. Improve AI opportunity analysis as the evidence base grows, with explicit confidence and due-diligence steps.
