@@ -1,8 +1,9 @@
-# MADEIRA AI
+# META MADEIRA
 
 An independent, responsive island platform for travellers, residents, property seekers and investors.
 
-**Product name:** MADEIRA AI  
+**Product name:** META MADEIRA
+**AI engine:** MADEIRA AI  
 **Creator credit:** Created by VALÉRIO
 
 ## Included in this first MVP
@@ -44,4 +45,5 @@ This version now reads daily weather forecasts from the official IPMA open-data 
 2. Configure `OPENAI_API_KEY` in Vercel and test the server-side concierge.
 3. Add verified property and business listings with source links and timestamps.
 4. Add live trail-status ingestion and booking-provider integrations where permitted.
-5. Add booking/partner workflows and production mobile packaging.
+5. Populate and validate directory entries across all 11 municipalities, then add need/opportunity research workflows.
+6. Add booking/partner workflows and production mobile packaging.
