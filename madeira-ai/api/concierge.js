@@ -45,18 +45,19 @@ export default async function handler(req, res) {
   if (!messages.length || messages.length > 10) return res.status(400).json({ error: "Send between 1 and 10 messages." });
   const safeMessages = messages.map(m => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 4000) })).filter(m => m.content.trim());
   if (!safeMessages.length || safeMessages.some(m => !m.content)) return res.status(400).json({ error: "Message content is required." });
+  const model = process.env.MADEIRA_SEARCH_MODEL || process.env.OPENAI_MODEL || "gpt-6-astra";
   try {
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: { "Authorization": "Bearer " + process.env.OPENAI_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: process.env.MADEIRA_SEARCH_MODEL || "gpt-6-astra", instructions: SYSTEM, input: safeMessages, tools: [{ type: "web_search", search_context_size: "medium", external_web_access: true }], tool_choice: "required", include: ["web_search_call.action.sources"], max_output_tokens: 1600, store: false }),
+      body: JSON.stringify({ model, instructions: SYSTEM, input: safeMessages, tools: [{ type: "web_search", search_context_size: "medium", external_web_access: true }], tool_choice: "required", include: ["web_search_call.action.sources"], max_output_tokens: 1600, store: false }),
       signal: AbortSignal.timeout(55000)
     });
     const payload = await response.json();
     if (!response.ok) return res.status(response.status === 429 ? 429 : 502).json({ error: payload?.error?.message || "The live search service could not complete the request." });
     const answer = payload.output_text || (payload.output || []).filter(item => item.type === "message").flatMap(item => item.content || []).filter(item => item.type === "output_text").map(item => item.text).join("\n");
     if (!answer) return res.status(502).json({ error: "The search service returned an empty response." });
-    return res.status(200).json({ answer, sources: collectSources(payload.output), searchedAt: new Date().toISOString(), searchEnabled: true, model: payload.model || process.env.MADEIRA_SEARCH_MODEL || "gpt-6-astra" });
+    return res.status(200).json({ answer, sources: collectSources(payload.output), searchedAt: new Date().toISOString(), searchEnabled: true, model: payload.model || model });
   } catch (error) {
     const timeout = error.name === "TimeoutError" || error.name === "AbortError";
     return res.status(502).json({ error: timeout ? "Live web research timed out. Please try again." : "Could not reach the live search service." });
