@@ -212,6 +212,12 @@ function App(){
   const [needSubmitBusy,setNeedSubmitBusy]=useState(false);
   const [needSubmitMessage,setNeedSubmitMessage]=useState('');
   const [needSubmitError,setNeedSubmitError]=useState('');
+  const [analysisBusy,setAnalysisBusy]=useState(false);
+  const [analysisResult,setAnalysisResult]=useState('');
+  const [analysisSources,setAnalysisSources]=useState([]);
+  const [analysisError,setAnalysisError]=useState('');
+  const [analysisCounts,setAnalysisCounts]=useState(null);
+  const [analysisTimestamp,setAnalysisTimestamp]=useState('');
   const [metaRegion,setMetaRegion]=useState('all');
   const [businessCategory,setBusinessCategory]=useState('all');
   const [businessParish,setBusinessParish]=useState('all');
@@ -330,6 +336,26 @@ function App(){
   };
 
 
+
+  const runOpportunityAnalysis=async()=>{
+    setAnalysisBusy(true);setAnalysisError('');
+    if(!supabase){setAnalysisError('Подключите Supabase Preview, чтобы запустить анализ.');setAnalysisBusy(false);return;}
+    try{
+      const {data,error}=await supabase.auth.getSession();
+      if(error)throw error;
+      if(!data.session){setAnalysisError('Войдите в аккаунт MADEIRA AI, чтобы запустить анализ.');setAuthOpen(true);return;}
+      const response=await fetch('/api/opportunity-analysis',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+data.session.access_token},
+        body:JSON.stringify({municipalityId:metaRegion})
+      });
+      const payload=await response.json();
+      if(!response.ok)throw new Error(payload.error||'Не удалось выполнить AI-анализ.');
+      setAnalysisResult(payload.answer||'');setAnalysisSources(payload.sources||[]);
+      setAnalysisCounts(payload.counts||null);setAnalysisTimestamp(payload.analyzedAt||new Date().toISOString());
+    }catch(error){setAnalysisError(error.message||'AI-анализ временно недоступен.');}
+    finally{setAnalysisBusy(false);}
+  };
 
   const submitNeed=async(e)=>{
     e.preventDefault();setNeedSubmitMessage('');setNeedSubmitError('');
@@ -496,6 +522,12 @@ function App(){
           <div className="meta-stats-grid">{metaConstructionIndicators.filter(item=>!item.municipality_id).slice(0,8).map(item=><article key={item.id}><span>{item.metric_label}</span><b>{Number(item.metric_value).toLocaleString(lang==='ru'?'ru-RU':lang==='pt'?'pt-PT':'en-GB')} <small>{item.unit.replaceAll('_',' ')}</small></b><small>{item.reference_year} · {item.comparison_period}</small></article>)}</div>
           <div className="meta-two-columns"><section><div className="meta-section-heading"><div><span className="eyebrow">PLANNING REGISTER</span><h2>{lang==='ru'?'Муниципальные планы':lang==='pt'?'Planos municipais':'Municipal plans'}</h2></div><span className="meta-count">{metaPlanning.length}</span></div>{metaPlanning.length?metaPlanning.filter(item=>metaRegion==='all'||item.municipality_id===metaRegion).map(item=><article className="meta-signal-card" key={item.id}><b>{item.title}</b><p>{item.summary}</p><small>{item.document_type} · {item.status}</small><a href={item.document_url||item.source_url} target="_blank" rel="noreferrer">{lang==='ru'?'Открыть документ':'Open document'} ↗</a></article>):<div className="meta-empty compact"><p>{lang==='ru'?'Реестр муниципальных PDM подключён. Документы будут добавляться после проверки статуса, даты действия и официальной публикации.':lang==='pt'?'O registo de PDM municipais está ligado. Os documentos serão adicionados após validação do estado, vigência e publicação oficial.':'The municipal PDM register is connected. Documents will be added after checking status, effective dates and official publication.'}</p><a href="https://prit.madeira.gov.pt/publico/planos" target="_blank" rel="noreferrer">PRIT — PDM ↗</a></div>}</section>
             <section><div className="meta-section-heading"><div><span className="eyebrow">OFFICIAL LAND OPPORTUNITIES</span><h2>{lang==='ru'?'Земельные возможности':lang==='pt'?'Oportunidades de terrenos':'Land opportunities'}</h2></div><span className="meta-count">{metaLandOpportunities.length}</span></div>{metaLandOpportunities.length?metaLandOpportunities.filter(item=>metaRegion==='all'||item.municipality_id===metaRegion).map(item=><article className="meta-signal-card opportunity" key={item.id}><b>{item.title}</b><p>{item.evidence_summary}</p><small>{item.opportunity_type} · {item.buildability_status} · {item.verification_status}</small><a href={item.source_url} target="_blank" rel="noreferrer">{lang==='ru'?'Официальный источник':'Official source'} ↗</a></article>):<div className="meta-empty compact"><p>{lang==='ru'?'Подтверждённых публичных участков пока нет. Мы не будем создавать фиктивные объявления или делать вывод о возможности строительства без проверки конкретного участка.':lang==='pt'?'Ainda não existem terrenos públicos confirmados. Não serão criados anúncios fictícios nem inferida a viabilidade de construção sem análise do terreno.':'There are no confirmed public land opportunities yet. We will not create fictional listings or infer buildability without parcel-specific checks.'}</p><a href="https://portaldoinvestidor.cm-pontadosol.pt/" target="_blank" rel="noreferrer">Portal do Investidor · Banco de Terras ↗</a></div>}</section></div>
+          <section className="meta-analysis-panel">
+            <div className="meta-analysis-heading"><div><span className="eyebrow">MADEIRA AI · BUSINESS & INVESTMENT RADAR</span><h2>{lang==='ru'?'AI-анализ бизнес- и инвестиционных проектов':lang==='pt'?'Análise IA de projetos empresariais e de investimento':'AI business & investment analysis'}</h2><p>{lang==='ru'?'AI сопоставит официальную статистику, проверенные потребности, каталог и актуальные публичные источники. Непроверенные идеи будут обозначены как гипотезы.':lang==='pt'?'A IA cruza estatísticas oficiais, necessidades validadas, diretório e fontes públicas atuais. Ideias não verificadas serão identificadas como hipóteses.':'AI will compare official statistics, validated needs, the directory and current public sources. Unverified ideas will be labelled as hypotheses.'}</p></div><button className="primary" type="button" onClick={runOpportunityAnalysis} disabled={analysisBusy}>{analysisBusy?(lang==='ru'?'Анализируем…':'Analysing…'):(lang==='ru'?'Запустить анализ':lang==='pt'?'Executar análise':'Run analysis')} <Sparkles size={15}/></button></div>
+            <div className="analysis-limit-note">{lang==='ru'?'Требуется вход в аккаунт. Лимит — до 3 анализов в час. Сырые сообщения жителей не передаются AI до модерации.':lang==='pt'?'Requer autenticação. Limite de 3 análises por hora. Mensagens originais não são enviadas à IA antes da moderação.':'Sign-in required. Limit: up to 3 analyses per hour. Raw community submissions are excluded until moderation.'}</div>
+            {analysisError&&<div className="meta-error" role="alert">{analysisError}</div>}
+            {analysisResult&&<div className="analysis-result"><small>{lang==='ru'?'Результат':lang==='pt'?'Resultado':'Result'} · {analysisTimestamp?new Date(analysisTimestamp).toLocaleString(lang==='ru'?'ru-RU':lang==='pt'?'pt-PT':'en-GB'):''}{analysisCounts?' · '+analysisCounts.directory+' '+(lang==='ru'?'записей каталога':'directory records')+' · '+analysisCounts.indicators+' '+(lang==='ru'?'показателей':'indicators'):''}</small><div className="analysis-answer">{analysisResult}</div>{analysisSources.length>0&&<div className="analysis-source-links"><b>{lang==='ru'?'Источники AI-исследования':'AI research sources'}</b>{analysisSources.map((source,i)=><a key={source.url||i} href={source.url} target="_blank" rel="noreferrer">{source.title} ↗</a>)}</div>}</div>}
+          </section>
           <div className="meta-section-heading"><div><span className="eyebrow">06 · TRUSTED DATA</span><h2>{lang==='ru'?'Источники данных архипелага':lang==='pt'?'Fontes de dados do arquipélago':'Archipelago data sources'}</h2></div><span className="meta-count">{metaSources.length}</span></div>
           <div className="meta-source-grid">{metaSources.map(source=><a href={source.url} key={source.id} target="_blank" rel="noreferrer"><span>{source.authority}</span><b>{source.name}</b><small>{source.update_note}</small></a>)}</div>
           <div className="meta-disclaimer">{lang==='ru'?'Статус «не найдено» не означает, что объекта или услуги не существует. Потребности и инвестиционные идеи должны проходить отдельную проверку.':lang==='pt'?'A ausência de um registo não prova que o serviço não exista. Necessidades e ideias de investimento exigem validação própria.':'An absent listing does not prove a service does not exist. Needs and investment ideas require independent validation.'}</div>
