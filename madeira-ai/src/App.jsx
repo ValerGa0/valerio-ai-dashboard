@@ -10,7 +10,7 @@ import IslandMap from './IslandMap';
 
 const copy = {
   ru: {
-    nav:['Обзор','META MADEIRA','Исследовать','Недвижимость','Путешествия','Бизнес и инвестиции','Транспорт','Погода','AI-консьерж'],
+    nav:['Обзор','Архипелаг','Исследовать','Недвижимость','Путешествия','Бизнес и инвестиции','Транспорт','Погода','AI-консьерж'],
     eyebrow:'ОДИН ОСТРОВ · МНОГО ВОЗМОЖНОСТЕЙ',
     headline:'Откройте Мадейру\nпо-новому.',
     intro:'Ваш интеллектуальный центр острова — для путешествий, жизни, недвижимости и новых идей.',
@@ -31,7 +31,7 @@ const copy = {
     locationTitle:'Погода рядом с вами', locationHint:'Нажмите кнопку, чтобы показать погоду и город по GPS.', locate:'Определить моё местоположение', locating:'Определяем местоположение…', refreshLocation:'Обновить', feelsLike:'Ощущается как', humidity:'Влажность', wind:'Ветер', locationPermission:'Разрешите доступ к геолокации в браузере.', locationUnavailable:'Геолокация недоступна на этом устройстве.', locationFailed:'Не удалось определить местоположение. Проверьте разрешение браузера.'
   },
   en: {
-    nav:['Overview','META MADEIRA','Explore','Real estate','Travel','Business & invest','Transport','Weather','AI concierge'],
+    nav:['Overview','Archipelago','Explore','Real estate','Travel','Business & invest','Transport','Weather','AI concierge'],
     eyebrow:'ONE ISLAND · MANY POSSIBILITIES',
     headline:'Discover Madeira\nin a new way.',
     intro:'Your intelligent island hub for travel, living, real estate and new opportunities.',
@@ -51,7 +51,7 @@ const copy = {
     locationTitle:'Weather near you', locationHint:'Use the button to show local weather and your city using GPS.', locate:'Use my location', locating:'Finding your location…', refreshLocation:'Refresh', feelsLike:'Feels like', humidity:'Humidity', wind:'Wind', locationPermission:'Allow location access in your browser.', locationUnavailable:'Geolocation is unavailable on this device.', locationFailed:'Could not determine your location. Check browser permission.'
   },
   pt: {
-    nav:['Visão geral','META MADEIRA','Explorar','Imobiliário','Viagens','Negócios e investimento','Transportes','Tempo','Assistente IA'],
+    nav:['Visão geral','Arquipélago','Explorar','Imobiliário','Viagens','Negócios e investimento','Transportes','Tempo','Assistente IA'],
     eyebrow:'UMA ILHA · MUITAS POSSIBILIDADES',
     headline:'Descubra a Madeira\nde uma nova forma.',
     intro:'O seu centro inteligente da ilha para viajar, viver, imobiliário e novas oportunidades.',
@@ -221,7 +221,25 @@ function App(){
   },[saved]);
 
   useEffect(()=>{
-    fetch('/api/porto-moniz').then(r=>r.ok?r.json():Promise.reject()).then(data=>setBusinessesData(data.businesses||[])).catch(()=>setBusinessesData([]));
+    let cancelled=false;
+    const loadLegacy=()=>fetch('/api/porto-moniz').then(r=>r.ok?r.json():Promise.reject()).then(data=>{
+      if(!cancelled)setBusinessesData(data.businesses||[]);
+    }).catch(()=>{if(!cancelled)setBusinessesData([]);});
+    if(!supabase){loadLegacy();return ()=>{cancelled=true;};}
+    supabase.from('island_directory_entries')
+      .select('id,external_key,name,category,parish,address,phone,description,website,source_id,source_url,verification_status,last_verified_at')
+      .eq('municipality_id','porto-moniz').eq('is_active',true).order('name')
+      .then(({data,error})=>{
+        if(cancelled)return;
+        if(error)throw error;
+        setBusinessesData((data||[]).map(entry=>({
+          id:entry.external_key||entry.id,name:entry.name,category:entry.category,
+          parish:entry.parish||'Porto Moniz',address:entry.address||'',phone:entry.phone||'',
+          source:entry.verification_status==='source_listed'?'municipal':entry.source_id==='google-maps-search'?'online':entry.source_id?'operator':'directory',
+          sourceUrl:entry.source_url||entry.website||'#',description:entry.description||''
+        })));
+      }).catch(()=>{loadLegacy();});
+    return ()=>{cancelled=true;};
   },[]);
 
   useEffect(()=>{
@@ -230,12 +248,12 @@ function App(){
 
   useEffect(()=>{
     if(active!=='meta') return;
-    if(!supabase){setMetaError('Для общей базы META MADEIRA подключите Supabase Preview.');return;}
+    if(!supabase){setMetaError('Для общей базы MADEIRA AI подключите Supabase Preview.');return;}
     let cancelled=false;
     setMetaLoading(true);setMetaError('');
     Promise.all([
       supabase.from('island_municipalities').select('id,island,name_pt,name_en,name_ru').order('name_pt'),
-      supabase.from('island_directory_entries').select('id,name,category,municipality_id,description,address,website,source_url,verification_status,last_verified_at').eq('is_active',true).order('name'),
+      supabase.from('island_directory_entries').select('id,external_key,name,category,municipality_id,parish,description,address,phone,website,source_id,source_url,verification_status,last_verified_at').eq('is_active',true).order('name'),
       supabase.from('island_needs').select('id,title,category,municipality_id,description,validation_status,priority').order('priority',{ascending:false}),
       supabase.from('island_opportunities').select('id,title,category,municipality_id,description,status').order('created_at',{ascending:false}),
       supabase.from('island_sources').select('id,name,category,publisher,url,authority,scope,update_note,last_checked_at').eq('is_active',true).order('name')
@@ -340,7 +358,7 @@ function App(){
 
   const renderHeader=()=> <header className="topbar">
     <button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)} aria-label="Menu"><Menu size={20}/></button>
-    <div className="crumb"><span>META MADEIRA</span><i>/</i>{t.nav[['overview','meta','explore','property','travel','invest','transport','weather','concierge'].indexOf(active)]}</div>
+    <div className="crumb"><span>MADEIRA AI</span><i>/</i>{t.nav[['overview','meta','explore','property','travel','invest','transport','weather','concierge'].indexOf(active)]}</div>
     <div className="top-actions">
       <label className="searchbox"><Search size={16}/><input value={query} onChange={e=>{setQuery(e.target.value);if(active==='overview')setActive('explore');}} placeholder={t.search}/><kbd>⌘ K</kbd></label>
       <select className="language" value={lang} onChange={e=>setLang(e.target.value)} aria-label="Language"><option value="ru">RU</option><option value="en">EN</option><option value="pt">PT</option></select>
@@ -355,7 +373,7 @@ function App(){
 
   return <div className="app-shell">
     <aside className={'sidebar '+(mobileOpen?'open':'')}>
-      <div className="brand"><div className="brand-mark"><Compass size={23}/></div><div><b>META MADEIRA</b><small>ISLAND INTELLIGENCE</small></div><button className="close-menu" onClick={()=>setMobileOpen(false)}><X size={18}/></button></div>
+      <div className="brand"><div className="brand-mark"><Compass size={23}/></div><div><b>MADEIRA AI</b><small>ISLAND INTELLIGENCE</small></div><button className="close-menu" onClick={()=>setMobileOpen(false)}><X size={18}/></button></div>
       <div className="side-label">DISCOVER</div>
       <nav>{['overview','meta','explore','property','travel','invest','transport','weather','concierge'].map((id,i)=>{
         const icons=[Map,Globe2,Compass,Building2,Plane,BriefcaseBusiness,CarFront,CloudSun,MessageCircle];const Icon=icons[i];
@@ -372,7 +390,7 @@ function App(){
       <div className="page-content">
         {active==='overview'&&<section>
           <div className="dashboard-welcome">
-            <div className="dashboard-welcome-copy"><span className="eyebrow"><span/> MADEIRA · ATLANTIC ISLAND</span><h1>META MADEIRA</h1><p>{t.intro}</p><div className="dashboard-welcome-actions"><button className="primary" onClick={()=>openSection('explore')}>{t.explore}<ArrowUpRight size={16}/></button><button className="ghost" onClick={()=>openSection('concierge')}><Sparkles size={16}/>{t.ask}</button></div></div>
+            <div className="dashboard-welcome-copy"><span className="eyebrow"><span/> MADEIRA · ATLANTIC ISLAND</span><h1>MADEIRA AI</h1><p>{t.intro}</p><div className="dashboard-welcome-actions"><button className="primary" onClick={()=>openSection('explore')}>{t.explore}<ArrowUpRight size={16}/></button><button className="ghost" onClick={()=>openSection('concierge')}><Sparkles size={16}/>{t.ask}</button></div></div>
             <div className="dashboard-coast-art"><div className="coast-sun"/><div className="coast-cliff"/><div className="coast-sea"/><span>ATLANTIC · PORTUGAL</span></div>
           </div>
           <div className="location-weather-card">
@@ -402,7 +420,7 @@ function App(){
         </section>}
 
         {active==='meta'&&<section className="module-page meta-page">
-          <div className="module-intro"><span className="eyebrow">META MADEIRA · ISLAND INTELLIGENCE</span><h1>META MADEIRA</h1><p>{lang==='ru'?'Единая цифровая система Мадейры и Порту-Санту: что существует, чего не хватает и где появляются возможности.':lang==='pt'?'Sistema digital integrado da Madeira e do Porto Santo: o que existe, o que falta e onde surgem oportunidades.':'A unified digital system for Madeira and Porto Santo: what exists, what is missing and where opportunities emerge.'}</p></div>
+          <div className="module-intro"><span className="eyebrow">MADEIRA AI · ARCHIPELAGO INTELLIGENCE</span><h1>{lang==='ru'?'Архипелаг Мадейры':lang==='pt'?'Arquipélago da Madeira':'Madeira Archipelago'}</h1><p>{lang==='ru'?'Единая цифровая система Мадейры и Порту-Санту: что существует, чего не хватает и где появляются возможности.':lang==='pt'?'Sistema digital integrado da Madeira e do Porto Santo: o que existe, o que falta e onde surgem oportunidades.':'A unified digital system for Madeira and Porto Santo: what exists, what is missing and where opportunities emerge.'}</p></div>
           <div className="meta-stats-grid">
             <article><span>{lang==='ru'?'Муниципалитеты':lang==='pt'?'Municípios':'Municipalities'}</span><b>{metaMunicipalities.length||'—'}</b><small>{lang==='ru'?'Мадейра + Порту-Санту':lang==='pt'?'Madeira + Porto Santo':'Madeira + Porto Santo'}</small></article>
             <article><span>{lang==='ru'?'Источники':lang==='pt'?'Fontes':'Sources'}</span><b>{metaSources.length||'—'}</b><small>{lang==='ru'?'Реестр официальных данных':lang==='pt'?'Registo de dados oficiais':'Official source register'}</small></article>
